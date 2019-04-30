@@ -33,8 +33,13 @@ let video = document.getElementById('videoInput');
 let src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
 let dst = new cv.Mat(video.height, video.width, cv.CV_8UC1);
 let cap = new cv.VideoCapture(video);
+let ballData = document.getElementById('balls');
+let throwsData  = document.getElementById('throws');
+let throwsString = '';
+let counter = 0;
+let previousPos = '';
 
-const FPS = 45;
+const FPS = 120;
 function processVideo() {
     try {
         if (!streaming) {
@@ -52,8 +57,8 @@ function processVideo() {
 
         //starting range
         if (lower == null){
-            lower = new cv.Mat(dst.rows, dst.cols, dst.type(), [70, 128, 114, 44])
-            upper = new cv.Mat(dst.rows, dst.cols, dst.type(), [255, 210, 194, 124])
+            lower = new cv.Mat(dst.rows, dst.cols, dst.type(), [92, 80, 160, 0])
+            upper = new cv.Mat(dst.rows, dst.cols, dst.type(), [99, 133, 240, 0])
         }
 
         cv.inRange(dst, lower, upper, dst);
@@ -70,20 +75,41 @@ function processVideo() {
         let ball;
         let center;
         let area;
-        let areaThreshHold = 150;
+        let areaThreshHold = 200;
+        let ballString = '';
 
         for (let i = 0; i < contours.size(); i++) {
-            area = cv.contourArea(contours.get(i));
-            if (area>areaThreshHold){
-                ball = cv.boundingRect(contours.get(i));
-                center = new cv.Point(ball.x + Math.round(ball.width/2), ball.y + Math.round(ball.height/2));
-                cv.circle(src, center, Math.round(ball.width/2), [0, 255, 0, 255], 2);
-                cv.imshow('canvasOutput', src);
+        //i = 0;
+            if (contours.get(i)) {
+                area = cv.contourArea(contours.get(i));
+                if (area>areaThreshHold){
+                    ball = cv.boundingRect(contours.get(i));
+                    center = new cv.Point(ball.x + Math.round(ball.width/2), ball.y + Math.round(ball.height/2));
+                    ballPoint = new cv.Point(ball.x -20, ball.y - 10);
+                    cv.circle(src, center, Math.round(ball.width/2), [0, 255, 0, 255], 2);
+
+                    cv.putText(src,"Ball: "+ (i+1) ,ballPoint,cv.FONT_HERSHEY_PLAIN, 1.5, [255,255,255,255], 2, 8, false);
+                    ballString += "BALL " + (i+1) + "   X: " + ball.x + "  Y: " + ball.y + "</br>"
+
+                    if (ballString != previousPos){
+                        throwsString += ballString;
+                    }
+                    previousPos = ballString;
+                
+                }
             }
         }
+        ballData.innerHTML = ballString;
+        throwsData.innerHTML = throwsString;
+        
         
         // schedule the next one.
 
+        if (ballString != '' || throwsString != '') counter++;
+        if (counter == 150){
+            counter = 0;
+            throwsString = '';
+        }
         let delay = 1000/FPS - (Date.now() - begin);
         setTimeout(processVideo, delay);
     } catch (err) {
