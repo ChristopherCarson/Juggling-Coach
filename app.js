@@ -52,8 +52,8 @@ function processVideo() {
 
         //starting range
         if (lower == null){
-            lower = new cv.Mat(dst.rows, dst.cols, dst.type(), [70, 128, 114, 44])
-            upper = new cv.Mat(dst.rows, dst.cols, dst.type(), [255, 210, 194, 124])
+        lower = new cv.Mat(dst.rows, dst.cols, dst.type(), [92, 80, 160, 0])
+        upper = new cv.Mat(dst.rows, dst.cols, dst.type(), [99, 133, 240, 0])
         }
 
         cv.inRange(dst, lower, upper, dst);
