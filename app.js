@@ -33,6 +33,7 @@ let video = document.getElementById('videoInput');
 let src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
 let dst = new cv.Mat(video.height, video.width, cv.CV_8UC1);
 let cap = new cv.VideoCapture(video);
+let nsrc = new cv.Mat();
 
 const FPS = 45;
 function processVideo() {
@@ -48,39 +49,28 @@ function processVideo() {
         //If this imshow isn't here, the canvasOutput is blank until the color is detected.
         cv.imshow('canvasOutput', src);
         cap.read(src);
-        cv.cvtColor(src, dst, cv.COLOR_BGR2HSV);
 
-        //starting range
-        if (lower == null){
-        lower = new cv.Mat(dst.rows, dst.cols, dst.type(), [92, 80, 160, 0])
-        upper = new cv.Mat(dst.rows, dst.cols, dst.type(), [99, 133, 240, 0])
+        nsrc = src.clone();
+
+        //let src = cv.imread('canvasInput');
+        let dst = cv.Mat.zeros(nsrc.rows, nsrc.cols, cv.CV_8U);
+        let circles = new cv.Mat();
+        let color = new cv.Scalar(255, 0, 0);
+        cv.cvtColor(nsrc, nsrc, cv.COLOR_RGBA2GRAY, 0);
+        // You can try more different parameters
+        cv.HoughCircles(nsrc, circles, cv.HOUGH_GRADIENT,
+                1, 45, 75, 40, 5, 30);
+        // draw circles
+        for (let i = 0; i < circles.cols; ++i) {
+            let x = circles.data32F[i * 3];
+            let y = circles.data32F[i * 3 + 1];
+            let radius = circles.data32F[i * 3 + 2];
+            let center = new cv.Point(x, y);
+            cv.circle(dst, center, radius, color);
         }
+        cv.imshow('canvasOutput', dst);
+        circles.delete();
 
-        cv.inRange(dst, lower, upper, dst);
-
-        let M = cv.Mat.ones(5, 5, cv.CV_8U);
-        let anchor = new cv.Point(-1, -1);
-
-        cv.dilate(dst, dst, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
-
-        let contours = new cv.MatVector();
-        let hierarchy = new cv.Mat();
-        cv.findContours(dst, contours, hierarchy, 1, 2);
-        
-        let ball;
-        let center;
-        let area;
-        let areaThreshHold = 150;
-
-        for (let i = 0; i < contours.size(); i++) {
-            area = cv.contourArea(contours.get(i));
-            if (area>areaThreshHold){
-                ball = cv.boundingRect(contours.get(i));
-                center = new cv.Point(ball.x + Math.round(ball.width/2), ball.y + Math.round(ball.height/2));
-                cv.circle(src, center, Math.round(ball.width/2), [0, 255, 0, 255], 2);
-                cv.imshow('canvasOutput', src);
-            }
-        }
         
         // schedule the next one.
 
