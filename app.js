@@ -7,6 +7,7 @@ let canvasOutput = document.getElementById('canvasOutput');
 let canvasContext = canvasOutput.getContext('2d');
 let lower = null;
 let upper = null;
+let oneTime = false;
 
 startAndStop.addEventListener('click', () => {
     if (!streaming) {
@@ -33,6 +34,9 @@ let video = document.getElementById('videoInput');
 let src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
 let dst = new cv.Mat(video.height, video.width, cv.CV_8UC1);
 let cap = new cv.VideoCapture(video);
+let master = new cv.Mat();
+let diff = new cv.Mat();
+
 
 const FPS = 45;
 function processVideo() {
@@ -44,11 +48,27 @@ function processVideo() {
             return;
         }
         let begin = Date.now();
+        
         // start processing.
         //If this imshow isn't here, the canvasOutput is blank until the color is detected.
-        cv.imshow('canvasOutput', src);
+        //cv.imshow('canvasOutput', src);
         cap.read(src);
-        cv.cvtColor(src, dst, cv.COLOR_BGR2HSV);
+
+        cv.cvtColor(src, dst, cv.COLOR_BGR2GRAY);
+
+        let ksize = new cv.Size(21, 21);
+        cv.GaussianBlur(dst, dst, ksize, 0, 0, cv.BORDER_DEFAULT);
+
+        if (oneTime == false){
+            oneTime = true;
+            master = dst;
+        }
+
+        cv.absdiff(master, dst, diff)
+
+        cv.imshow('canvasOutput', diff);
+
+        master = dst;
 
         //starting range
         if (lower == null){
@@ -78,14 +98,14 @@ function processVideo() {
                 ball = cv.boundingRect(contours.get(i));
                 center = new cv.Point(ball.x + Math.round(ball.width/2), ball.y + Math.round(ball.height/2));
                 cv.circle(src, center, Math.round(ball.width/2), [0, 255, 0, 255], 2);
-                cv.imshow('canvasOutput', src);
+                
             }
         }
         
         // schedule the next one.
-
+        console.log('NOw');
         let delay = 1000/FPS - (Date.now() - begin);
-        setTimeout(processVideo, delay);
+        setTimeout(processVideo, 100);
     } catch (err) {
         utils.printError(err);
     }
