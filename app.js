@@ -31,7 +31,13 @@ function onVideoStarted() {
 
 let video = document.getElementById('videoInput');
 let src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
-let dst = new cv.Mat(video.height, video.width, cv.CV_8UC1);
+let colorFrame = new cv.Mat();
+let dst = new cv.Mat();
+let motionFrame = new cv.Mat();
+let diff = new cv.Mat();
+let thresh = new cv.Mat();
+let oneTime = false
+
 let cap = new cv.VideoCapture(video);
 
 const FPS = 45;
@@ -40,7 +46,7 @@ function processVideo() {
         if (!streaming) {
             // clean and stop.
             src.delete();
-            dst.delete();
+            colorFrame.delete();
             return;
         }
         let begin = Date.now();
@@ -48,40 +54,81 @@ function processVideo() {
         //If this imshow isn't here, the canvasOutput is blank until the color is detected.
         cv.imshow('canvasOutput', src);
         cap.read(src);
+
+        cv.cvtColor(src, motionFrame, cv.COLOR_BGR2GRAY);
+
+        let ksize = new cv.Size(21, 21);
+        cv.GaussianBlur(motionFrame, motionFrame, ksize, 0, 0, cv.BORDER_DEFAULT);
+
+        if (oneTime == false){
+            oneTime = true;
+            master = motionFrame.clone();
+        }
+
+        cv.absdiff(master, motionFrame, diff)
+
+        cv.threshold(diff, thresh, 15, 255, cv.THRESH_BINARY)
+
+        let anchor = new cv.Point(-1, -1);
+        let M = cv.Mat.ones(5, 5, cv.CV_8U);
+        
+        cv.dilate(thresh, thresh, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
+
+        let contoursMotion = new cv.MatVector();
+        let hierarchy = new cv.Mat();
+        cv.findContours(thresh, contoursMotion, hierarchy, 1, 2);
+
+
+
         cv.cvtColor(src, dst, cv.COLOR_BGR2HSV);
 
         //starting range
         if (lower == null){
-        lower = new cv.Mat(dst.rows, dst.cols, dst.type(), [92, 80, 160, 0])
-        upper = new cv.Mat(dst.rows, dst.cols, dst.type(), [99, 133, 240, 0])
+            lower = new cv.Mat(dst.rows, dst.cols, dst.type(), [92, 80, 160, 0])
+            upper = new cv.Mat(dst.rows, dst.cols, dst.type(), [99, 133, 240, 0])
         }
+        //console.log(lower, upper)
 
-        cv.inRange(dst, lower, upper, dst);
+        cv.inRange(dst, lower, upper, colorFrame);
 
-        let M = cv.Mat.ones(5, 5, cv.CV_8U);
-        let anchor = new cv.Point(-1, -1);
+        cv.dilate(colorFrame, colorFrame, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
 
-        cv.dilate(dst, dst, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
-
-        let contours = new cv.MatVector();
-        let hierarchy = new cv.Mat();
-        cv.findContours(dst, contours, hierarchy, 1, 2);
+        let contoursColor = new cv.MatVector();
+        cv.findContours(colorFrame, contoursColor, hierarchy, 1, 2);
         
-        let ball;
-        let center;
-        let area;
-        let areaThreshHold = 150;
+        let ballMotion;
+        let centerMotion;
+        let areaMotion;
+        let areaThreshHoldMotion = 2000;
 
-        for (let i = 0; i < contours.size(); i++) {
-            area = cv.contourArea(contours.get(i));
-            if (area>areaThreshHold){
-                ball = cv.boundingRect(contours.get(i));
-                center = new cv.Point(ball.x + Math.round(ball.width/2), ball.y + Math.round(ball.height/2));
-                cv.circle(src, center, Math.round(ball.width/2), [0, 255, 0, 255], 2);
-                cv.imshow('canvasOutput', src);
+        let ballColor;
+        let centerColor;
+        let areaColor;
+        let areaThreshHoldColor = 300;
+
+        for (let i = 0; i < contoursColor.size(); i++) {
+            areaColor = cv.contourArea(contoursColor.get(i));
+            if (areaColor>areaThreshHoldColor){
+                ballColor = cv.boundingRect(contoursColor.get(i));
+                centerColor = new cv.Point(ballColor.x + Math.round(ballColor.width/2), ballColor.y + Math.round(ballColor.height/2));
+                //cv.circle(src, centerColor, Math.round(ballColor.width/2), [0, 255, 0, 255], 8);
+                cv.circle(src, centerColor, 20, [0, 255, 0, 255], 8);
             }
         }
+
         
+        for (let i = 0; i < contoursMotion.size(); i++) {
+            areaMotion = cv.contourArea(contoursMotion.get(i));
+            if (areaMotion>areaThreshHoldMotion){
+                ballMotion = cv.boundingRect(contoursMotion.get(i));
+                centerMotion = new cv.Point(ballMotion.x + Math.round(ballMotion.width/2), ballMotion.y + Math.round(ballMotion.height/2));
+                cv.circle(src, centerMotion, 20, [255, 0, 0, 255], 8);
+            }
+        }
+
+        cv.imshow('canvasOutput', src);
+
+        master = motionFrame.clone();
         // schedule the next one.
 
         let delay = 1000/FPS - (Date.now() - begin);
