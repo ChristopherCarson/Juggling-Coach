@@ -4,6 +4,7 @@ let streaming = false;
 let videoInput = document.getElementById('videoInput');
 let startAndStop = document.getElementById('startAndStop');
 let canvasOutput = document.getElementById('canvasOutput');
+let dataDisplayDiv = document.getElementById('dataDisplayDiv');
 let canvasContext = canvasOutput.getContext('2d');
 let lower = null;
 let upper = null;
@@ -23,12 +24,6 @@ colorCapture.addEventListener('click', () => {
 });
 
 function onVideoStarted() {
-    streaming = true;
-    startAndStop.innerText = 'Stop';
-    videoInput.width = videoInput.videoWidth;
-    videoInput.height = videoInput.videoHeight;
-    colorCapture.disabled = false;
-
 let video = document.getElementById('videoInput');
 let src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
 let colorFrame = new cv.Mat();
@@ -38,7 +33,38 @@ let diff = new cv.Mat();
 let thresh = new cv.Mat();
 let oneTime = false
 
+let ballMotion;
+let centerMotion;
+let areaMotion;
+let areaThreshHoldMotion = 2000;
+
+let ballColor;
+let centerColor;
+let areaColor;
+let areaThreshHoldColor = 150;
+
 let cap = new cv.VideoCapture(video);
+let ksize = new cv.Size(21, 21);
+
+let begin
+let anchor = new cv.Point(-1, -1);
+let M = cv.Mat.ones(5, 5, cv.CV_8U);
+let contoursMotion = new cv.MatVector();
+let contoursColor = new cv.MatVector();
+let hierarchy = new cv.Mat();
+
+let dataColorCap = [];
+let dataMotionCap = [];
+let dataTimeSubtract = new Date().getTime()
+let dataFrame = 1;
+
+streaming = true;
+startAndStop.innerText = 'Stop';
+videoInput.width = videoInput.videoWidth;
+videoInput.height = videoInput.videoHeight;
+colorCapture.disabled = false;
+
+
 
 const FPS = 45;
 function processVideo() {
@@ -49,15 +75,13 @@ function processVideo() {
             colorFrame.delete();
             return;
         }
-        let begin = Date.now();
+        begin = Date.now();
         // start processing.
         //If this imshow isn't here, the canvasOutput is blank until the color is detected.
         cv.imshow('canvasOutput', src);
         cap.read(src);
 
         cv.cvtColor(src, motionFrame, cv.COLOR_BGR2GRAY);
-
-        let ksize = new cv.Size(21, 21);
         cv.GaussianBlur(motionFrame, motionFrame, ksize, 0, 0, cv.BORDER_DEFAULT);
 
         if (oneTime == false){
@@ -66,20 +90,9 @@ function processVideo() {
         }
 
         cv.absdiff(master, motionFrame, diff)
-
         cv.threshold(diff, thresh, 15, 255, cv.THRESH_BINARY)
-
-        let anchor = new cv.Point(-1, -1);
-        let M = cv.Mat.ones(5, 5, cv.CV_8U);
-        
         cv.dilate(thresh, thresh, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
-
-        let contoursMotion = new cv.MatVector();
-        let hierarchy = new cv.Mat();
         cv.findContours(thresh, contoursMotion, hierarchy, 1, 2);
-
-
-
         cv.cvtColor(src, dst, cv.COLOR_BGR2HSV);
 
         //starting range
@@ -87,36 +100,25 @@ function processVideo() {
             lower = new cv.Mat(dst.rows, dst.cols, dst.type(), [92, 80, 160, 0])
             upper = new cv.Mat(dst.rows, dst.cols, dst.type(), [99, 133, 240, 0])
         }
-        //console.log(lower, upper)
 
         cv.inRange(dst, lower, upper, colorFrame);
-
         cv.dilate(colorFrame, colorFrame, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
-
-        let contoursColor = new cv.MatVector();
         cv.findContours(colorFrame, contoursColor, hierarchy, 1, 2);
-        
-        let ballMotion;
-        let centerMotion;
-        let areaMotion;
-        let areaThreshHoldMotion = 2000;
-
-        let ballColor;
-        let centerColor;
-        let areaColor;
-        let areaThreshHoldColor = 300;
 
         for (let i = 0; i < contoursColor.size(); i++) {
             areaColor = cv.contourArea(contoursColor.get(i));
             if (areaColor>areaThreshHoldColor){
                 ballColor = cv.boundingRect(contoursColor.get(i));
                 centerColor = new cv.Point(ballColor.x + Math.round(ballColor.width/2), ballColor.y + Math.round(ballColor.height/2));
-                //cv.circle(src, centerColor, Math.round(ballColor.width/2), [0, 255, 0, 255], 8);
                 cv.circle(src, centerColor, 20, [0, 255, 0, 255], 8);
+                if (dataColorCap.length === 0){
+                    dataColorCap.push({ frame: dataFrame, time: new Date().getTime()-dataTimeSubtract, point: centerColor });
+                }else if (dataColorCap[dataColorCap.length-1].point.x !== centerColor.x && dataColorCap[dataColorCap.length-1].point.y !== centerColor.y){
+                    dataColorCap.push({ frame: dataFrame, time: new Date().getTime()-dataTimeSubtract, point: centerColor });
+                }
             }
         }
 
-        
         for (let i = 0; i < contoursMotion.size(); i++) {
             areaMotion = cv.contourArea(contoursMotion.get(i));
             if (areaMotion>areaThreshHoldMotion){
@@ -128,9 +130,17 @@ function processVideo() {
 
         cv.imshow('canvasOutput', src);
 
+        addEventListener("keydown", function(event) {
+            if (event.keyCode == 99)
+            dataDisplayDiv.innerHTML = '';
+            dataColorCap = [];
+          });
+        dataDisplayDiv.innerHTML = dataColorCap.map( data => JSON.stringify(data, null, 4))
+
         master = motionFrame.clone();
         // schedule the next one.
 
+        dataFrame++;
         let delay = 1000/FPS - (Date.now() - begin);
         setTimeout(processVideo, delay);
     } catch (err) {
