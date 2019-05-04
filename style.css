@@ -1,3 +1,11 @@
+
+#container-border {
+    border-width: 2px;
+    border-color: blue;
+    border-style: dashed;
+    width: 650px;
+  }
+
 body, div, p {
     font: 400 14px/22px Roboto,sans-serif;
 }
