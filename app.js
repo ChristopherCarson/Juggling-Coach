@@ -4,7 +4,8 @@ let streaming = false;
 let videoInput = document.getElementById('videoInput');
 let startAndStop = document.getElementById('startAndStop');
 let canvasOutput = document.getElementById('canvasOutput');
-let dataDisplayDiv = document.getElementById('dataDisplayDiv');
+let dataDisplayColor = document.getElementById('dataDisplayColor');
+let dataDisplayMotion = document.getElementById('dataDisplayMotion');
 let canvasContext = canvasOutput.getContext('2d');
 let lower = null;
 let upper = null;
@@ -125,6 +126,11 @@ function processVideo() {
                 ballMotion = cv.boundingRect(contoursMotion.get(i));
                 centerMotion = new cv.Point(ballMotion.x + Math.round(ballMotion.width/2), ballMotion.y + Math.round(ballMotion.height/2));
                 cv.circle(src, centerMotion, 20, [255, 0, 0, 255], 8);
+                if (dataMotionCap.length === 0){
+                    dataMotionCap.push({ frame: dataFrame, time: new Date().getTime()-dataTimeSubtract, point: centerMotion });
+                }else if (dataMotionCap[dataMotionCap.length-1].point.x !== centerMotion.x && dataMotionCap[dataMotionCap.length-1].point.y !== centerMotion.y){
+                    dataMotionCap.push({ frame: dataFrame, time: new Date().getTime()-dataTimeSubtract, point: centerMotion });
+                }
             }
         }
 
@@ -132,10 +138,20 @@ function processVideo() {
 
         addEventListener("keydown", function(event) {
             if (event.keyCode == 99)
-            dataDisplayDiv.innerHTML = '';
+            dataDisplayColor.innerHTML = '';
+            dataDisplayMotion.innerHTML = '';
             dataColorCap = [];
+            dataMotionCap = [];
           });
-        dataDisplayDiv.innerHTML = dataColorCap.map( data => JSON.stringify(data, null, 4))
+
+         // for (var i = 0; i < Object.keys(dataColorCap).length; i++) {
+         //     var tr = "<tr>";
+         //     tr += "<td>" + dataColorCap[i].frame + "</td>" + "<td>" + dataColorCap[i].time.toString() + "</td></tr>";
+         //     dataDisplayColor.innerHTML += tr;
+         // }
+
+        dataDisplayColor.innerHTML = dataColorCap.map( data => JSON.stringify(data, null, 4))
+        dataDisplayMotion.innerHTML = dataMotionCap.map( data => JSON.stringify(data, null, 4))
 
         master = motionFrame.clone();
         // schedule the next one.
