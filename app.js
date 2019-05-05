@@ -323,6 +323,20 @@ function capture() {
                 upper = new cv.Mat(frame_HSV.rows, frame_HSV.cols, frame_HSV.type(),
                     [minMaxH.maxVal, minMaxS.maxVal, minMaxV.maxVal, 250]);
 
+                    hueMaxSlider.value = minMaxH.maxVal;
+                    hueMinSlider.value = minMaxH.minVal;
+                    satMaxSlider.value = minMaxS.maxVal;
+                    satMinSlider.value = minMaxS.minVal;
+                    valMaxSlider.value = minMaxV.maxVal;
+                    valMinSlider.value = minMaxV.minVal;
+        
+                    hueMaxText.innerHTML = minMaxH.maxVal;
+                    hueMinText.innerHTML = minMaxH.minVal;
+                    satMaxText.innerHTML = minMaxS.maxVal;
+                    satMinText.innerHTML = minMaxS.minVal;
+                    valMaxText.innerHTML = minMaxV.maxVal;
+                    valMinText.innerHTML = minMaxV.minVal;
+
                 dst.delete();
 
             } catch (err) {
