@@ -8,6 +8,19 @@ function addToPlot(markerType, xCoord, yCoord) {
 	}, [markerType])
 }
 
+var layout = {
+	autosize: false,
+	width:420,
+	height:440,
+	margin: {
+		l: 25,
+		r: 25,
+		b: 50,
+		t: 50,
+		pad: 4
+    }
+};
+
 Plotly.plot('scatterPlot', [
 {
   y: [].map(rand),
@@ -22,4 +35,4 @@ Plotly.plot('scatterPlot', [
   mode: 'markers',
   line: {color: '#E60B0B'},
   name: "Motion"
-}]);
+}], layout);
