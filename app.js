@@ -208,7 +208,7 @@ function onVideoStarted() {
                         });
                     }
                     //Add to scatterPlot
-                    addToPlot(0, centerColor.x, centerColor.y)
+                    addToPlot(0, centerColor.x, (centerColor.y - (centerColor.y * 2))
                 }
             }
 
@@ -232,7 +232,7 @@ function onVideoStarted() {
                         });
                     }
                     //Add to scatterPlot
-                    addToPlot(1, centerMotion.x, centerMotion.y)
+                    addToPlot(1, centerMotion.x, (centerMotion.y - (centerMotion.y * 2))
                 }
             }
 
