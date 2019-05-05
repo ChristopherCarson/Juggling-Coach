@@ -114,6 +114,7 @@ function onVideoStarted() {
         dataColorCap = [];
         dataMotionCap = [];
         purgePlot();
+        createPlot();
     });
 
     let FPS = 45;
