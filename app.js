@@ -113,10 +113,8 @@ function onVideoStarted() {
         dataDisplayMotion.innerHTML = '';
         dataColorCap = [];
         dataMotionCap = [];
-        createPlot();
+        purgePlot();
     });
-
-
 
     let FPS = 45;
     framesPerSecSlider.value = FPS;
