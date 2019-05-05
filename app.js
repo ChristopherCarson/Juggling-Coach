@@ -207,6 +207,8 @@ function onVideoStarted() {
                             point: centerColor
                         });
                     }
+                    //Add to scatterPlot
+                    addToPlot(0, centerColor.x, centerColor.y)
                 }
             }
 
@@ -229,6 +231,8 @@ function onVideoStarted() {
                             point: centerMotion
                         });
                     }
+                    //Add to scatterPlot
+                    addToPlot(1, centerMotion.x, centerMotion.y)
                 }
             }
 
