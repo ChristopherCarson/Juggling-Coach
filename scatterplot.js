@@ -1,6 +1,6 @@
   
 function rand() {
-  return Math.random();
+        return Math.random();
 }  
 
 function addToPlot(markerType, xCoord, yCoord) {
@@ -38,6 +38,10 @@ function createPlot() {
 	  line: {color: '#E60B0B'},
 	  name: "Motion"
 	}], layout);
+}
+
+function purgePlot() {
+	Plotly.purge("scatterPlot");
 }
 
 createPlot();
