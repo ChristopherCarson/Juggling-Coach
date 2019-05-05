@@ -1,9 +1,25 @@
-var data = {
-  x: [1, 2, 3, 4],
-  y: [10, 15, 13, 17],
-  mode: 'markers'
-};
+function rand() {
+  return Math.random();
+}  
 
-var layout = {};
+function addToPlot(markerType, xCoord, yCoord) {
+	Plotly.extendTraces('scatterPlot', {
+		x: [[xCoord]], y: [[yCoord]]
+	}, [markerType])
+}
 
-Plotly.newPlot('scatterPlot', data, layout);
+Plotly.plot('scatterPlot', [
+{
+  y: [].map(rand),
+  x: [].map(rand),
+  mode: 'markers',
+  line: {color: '#0FE60B'},
+  name: "Color"
+},
+{
+  y: [].map(rand),
+  x: [].map(rand),
+  mode: 'markers',
+  line: {color: '#E60B0B'},
+  name: "Motion"
+}]);
