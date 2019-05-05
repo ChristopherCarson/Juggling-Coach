@@ -1,31 +1,49 @@
 let utils = new Utils('errorMessage');
 
 let streaming = false;
-let videoInput = document.getElementById('videoInput');
-let startAndStop = document.getElementById('startAndStop');
-let canvasOutput = document.getElementById('canvasOutput');
-let dataDisplayColor = document.getElementById('dataDisplayColor');
-let dataDisplayMotion = document.getElementById('dataDisplayMotion');
+const videoInput = document.getElementById('videoInput');
+const startAndStop = document.getElementById('startAndStop');
+const canvasOutput = document.getElementById('canvasOutput');
+const dataDisplayColor = document.getElementById('dataDisplayColor');
+const dataDisplayMotion = document.getElementById('dataDisplayMotion');
 
 //Dev Tools
-let hueMaxSlider = document.getElementById('hueMaxSlider')
-let hueMaxText = document.getElementById('hueMaxText')
-let hueMinSlider = document.getElementById('hueMinSlider')
-let hueMinText = document.getElementById('hueMinText')
+const hueMaxSlider = document.getElementById('hueMaxSlider')
+const hueMaxText = document.getElementById('hueMaxText')
+const hueMinSlider = document.getElementById('hueMinSlider')
+const hueMinText = document.getElementById('hueMinText')
 
-let satMaxSlider = document.getElementById('satMaxSlider')
-let satMaxText = document.getElementById('satMaxText')
-let satMinSlider = document.getElementById('satMinSlider')
-let satMinText = document.getElementById('satMinText')
+const satMaxSlider = document.getElementById('satMaxSlider')
+const satMaxText = document.getElementById('satMaxText')
+const satMinSlider = document.getElementById('satMinSlider')
+const satMinText = document.getElementById('satMinText')
 
-let valMaxSlider = document.getElementById('valMaxSlider')
-let valMaxText = document.getElementById('valMaxText')
-let valMinSlider = document.getElementById('valMinSlider')
-let valMinText = document.getElementById('valMinText')
+const valMaxSlider = document.getElementById('valMaxSlider')
+const valMaxText = document.getElementById('valMaxText')
+const valMinSlider = document.getElementById('valMinSlider')
+const valMinText = document.getElementById('valMinText')
+
+const colorThreshSlider = document.getElementById('colorThreshSlider')
+const colorThreshText = document.getElementById('colorThreshText')
+const motionThreshSlider = document.getElementById('motionThreshSlider')
+const motionThreshText = document.getElementById('motionThreshText')
+
+const framesPerSecSlider = document.getElementById('framesPerSecSlider')
+const framesPerSecText = document.getElementById('framesPerSecText')
 
 let canvasContext = canvasOutput.getContext('2d');
 let lower = null;
 let upper = null;
+
+// The higher this value, the less the fps will reflect temporary variations
+// A value of 1 will only keep the last value
+const filterStrength = 10;
+let frameTime = 0, lastLoop = new Date, thisLoop;
+var fpsOut = document.getElementById('fps');
+
+setInterval(function(){
+  fpsOut.innerHTML = (1000/frameTime).toFixed(1) + " fps";
+},1000);
 
 startAndStop.addEventListener('click', () => {
     if (!streaming) {
@@ -61,6 +79,12 @@ function onVideoStarted() {
     let areaColor;
     let areaThreshHoldColor = 150;
 
+    colorThreshSlider.value = areaThreshHoldColor;
+    motionThreshSlider.value = areaThreshHoldMotion;
+
+    colorThreshText.innerHTML = colorThreshSlider.value;
+    motionThreshText.innerHTML = motionThreshSlider.value;
+
     let cap = new cv.VideoCapture(video);
     let ksize = new cv.Size(21, 21);
 
@@ -82,9 +106,19 @@ function onVideoStarted() {
     videoInput.height = videoInput.videoHeight;
     colorCapture.disabled = false;
 
+    
+    addEventListener("keydown", function (event) {
+        if (event.keyCode == 99)
+            dataDisplayColor.innerHTML = '';
+        dataDisplayMotion.innerHTML = '';
+        dataColorCap = [];
+        dataMotionCap = [];
+    });
 
 
-    const FPS = 45;
+
+    let FPS = 45;
+    framesPerSecSlider.value = FPS;
 
     function processVideo() {
         try {
@@ -92,6 +126,15 @@ function onVideoStarted() {
                 // clean and stop.
                 src.delete();
                 colorFrame.delete();
+                dst.delete();
+                motionFrame.delete();
+                diff.delete();
+                thresh.delete();
+                M.delete();
+                contoursMotion.delete();
+                contoursColor.delete();
+                hierarchy.delete();
+
                 return;
             }
             begin = Date.now();
@@ -116,29 +159,29 @@ function onVideoStarted() {
 
             //starting range
             if (lower == null) {
-            let hMin = 92;
-            let hMax = 99;
-            let sMin = 80;
-            let sMax = 133;
-            let vMin = 160;
-            let vMax = 240;
+                let hMin = 92;
+                let hMax = 99;
+                let sMin = 80;
+                let sMax = 133;
+                let vMin = 160;
+                let vMax = 240;
 
-            lower = new cv.Mat(dst.rows, dst.cols, dst.type(), [hMin, sMin, vMin, 0]);
-            upper = new cv.Mat(dst.rows, dst.cols, dst.type(), [hMax, sMax, vMax, 0]);
-                
-            hueMaxSlider.value = hMax;
-            hueMinSlider.value = hMin;
-            satMaxSlider.value = sMax;
-            satMinSlider.value = sMin;
-            valMaxSlider.value = vMax;
-            valMinSlider.value = vMin;
+                lower = new cv.Mat(dst.rows, dst.cols, dst.type(), [hMin, sMin, vMin, 0]);
+                upper = new cv.Mat(dst.rows, dst.cols, dst.type(), [hMax, sMax, vMax, 0]);
 
-            hueMaxText.innerHTML = hMax;
-            hueMinText.innerHTML = hMin;
-            satMaxText.innerHTML = sMax;
-            satMinText.innerHTML = sMin;
-            valMaxText.innerHTML = vMax;
-            valMinText.innerHTML = vMin;
+                hueMaxSlider.value = hMax;
+                hueMinSlider.value = hMin;
+                satMaxSlider.value = sMax;
+                satMinSlider.value = sMin;
+                valMaxSlider.value = vMax;
+                valMinSlider.value = vMin;
+
+                hueMaxText.innerHTML = hMax;
+                hueMinText.innerHTML = hMin;
+                satMaxText.innerHTML = sMax;
+                satMinText.innerHTML = sMin;
+                valMaxText.innerHTML = vMax;
+                valMinText.innerHTML = vMin;
             }
 
             cv.inRange(dst, lower, upper, colorFrame);
@@ -191,18 +234,14 @@ function onVideoStarted() {
 
             cv.imshow('canvasOutput', src);
 
-            addEventListener("keydown", function (event) {
-                if (event.keyCode == 99)
-                    dataDisplayColor.innerHTML = '';
-                dataDisplayMotion.innerHTML = '';
-                dataColorCap = [];
-                dataMotionCap = [];
-            });
-            
-            lower = new cv.Mat(dst.rows, dst.cols, dst.type(), 
-            [ parseInt(hueMinSlider.value), parseInt(satMinSlider.value), parseInt(valMinSlider.value), 0]);
-            upper = new cv.Mat(dst.rows, dst.cols, dst.type(), 
-            [ parseInt(hueMaxSlider.value), parseInt(satMaxSlider.value), parseInt(valMaxSlider.value), 0]);
+            var thisFrameTime = (thisLoop=new Date) - lastLoop;
+            frameTime+= (thisFrameTime - frameTime) / filterStrength;
+            lastLoop = thisLoop;
+
+            lower = new cv.Mat(dst.rows, dst.cols, dst.type(),
+                [parseInt(hueMinSlider.value), parseInt(satMinSlider.value), parseInt(valMinSlider.value), 0]);
+            upper = new cv.Mat(dst.rows, dst.cols, dst.type(),
+                [parseInt(hueMaxSlider.value), parseInt(satMaxSlider.value), parseInt(valMaxSlider.value), 0]);
 
             hueMaxText.innerHTML = hueMaxSlider.value;
             hueMinText.innerHTML = hueMinSlider.value;
@@ -211,12 +250,24 @@ function onVideoStarted() {
             valMaxText.innerHTML = valMaxSlider.value;
             valMinText.innerHTML = valMinSlider.value;
 
+            areaThreshHoldColor = parseInt(colorThreshSlider.value);
+            areaThreshHoldMotion = parseInt(motionThreshSlider.value);
+ 
+            colorThreshText.innerHTML = colorThreshSlider.value;
+            motionThreshText.innerHTML = motionThreshSlider.value;
+
+            FPS = parseInt(framesPerSecSlider.value);
+            framesPerSecText.innerHTML = framesPerSecSlider.value;
+
+
             // for (var i = 0; i < Object.keys(dataColorCap).length; i++) {
             //     var tr = "<tr>";
             //     tr += "<td>" + dataColorCap[i].frame + "</td>" + "<td>" + dataColorCap[i].time.toString() + "</td></tr>";
             //     dataDisplayColor.innerHTML += tr;
             // }
 
+            if (dataColorCap.length > 20) dataColorCap = []
+            if (dataMotionCap.length > 20) dataMotionCap = []
             dataDisplayColor.innerHTML = dataColorCap.map(data => JSON.stringify(data, null, 4))
             dataDisplayMotion.innerHTML = dataMotionCap.map(data => JSON.stringify(data, null, 4))
 
@@ -323,21 +374,24 @@ function capture() {
                 upper = new cv.Mat(frame_HSV.rows, frame_HSV.cols, frame_HSV.type(),
                     [minMaxH.maxVal, minMaxS.maxVal, minMaxV.maxVal, 250]);
 
-                    hueMaxSlider.value = minMaxH.maxVal;
-                    hueMinSlider.value = minMaxH.minVal;
-                    satMaxSlider.value = minMaxS.maxVal;
-                    satMinSlider.value = minMaxS.minVal;
-                    valMaxSlider.value = minMaxV.maxVal;
-                    valMinSlider.value = minMaxV.minVal;
-        
-                    hueMaxText.innerHTML = minMaxH.maxVal;
-                    hueMinText.innerHTML = minMaxH.minVal;
-                    satMaxText.innerHTML = minMaxS.maxVal;
-                    satMinText.innerHTML = minMaxS.minVal;
-                    valMaxText.innerHTML = minMaxV.maxVal;
-                    valMinText.innerHTML = minMaxV.minVal;
+                hueMaxSlider.value = minMaxH.maxVal;
+                hueMinSlider.value = minMaxH.minVal;
+                satMaxSlider.value = minMaxS.maxVal;
+                satMinSlider.value = minMaxS.minVal;
+                valMaxSlider.value = minMaxV.maxVal;
+                valMinSlider.value = minMaxV.minVal;
+
+                hueMaxText.innerHTML = minMaxH.maxVal;
+                hueMinText.innerHTML = minMaxH.minVal;
+                satMaxText.innerHTML = minMaxS.maxVal;
+                satMinText.innerHTML = minMaxS.minVal;
+                valMaxText.innerHTML = minMaxV.maxVal;
+                valMinText.innerHTML = minMaxV.minVal;
 
                 dst.delete();
+                cap.delete();
+                rgbaPlanes.delete();
+                frame_HSV.delete();
 
             } catch (err) {
                 console.log("Error: ", err.message)
