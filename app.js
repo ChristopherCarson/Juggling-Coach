@@ -113,6 +113,7 @@ function onVideoStarted() {
         dataDisplayMotion.innerHTML = '';
         dataColorCap = [];
         dataMotionCap = [];
+        createPlot();
     });
 
 
