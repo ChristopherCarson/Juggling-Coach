@@ -32,8 +32,6 @@ const framesPerSecSlider = document.getElementById('framesPerSecSlider')
 const framesPerSecText = document.getElementById('framesPerSecText')
 
 let canvasContext = canvasOutput.getContext('2d');
-let lower = null;
-let upper = null;
 
 // The higher this value, the less the fps will reflect temporary variations
 // A value of 1 will only keep the last value
@@ -100,6 +98,9 @@ function onVideoStarted() {
     let dataTimeSubtract = new Date().getTime()
     let dataFrame = 1;
 
+    let lower = null;
+    let upper = null;
+
     streaming = true;
     startAndStop.innerText = 'Stop';
     videoInput.width = videoInput.videoWidth;
@@ -116,6 +117,28 @@ function onVideoStarted() {
     });
 
 
+    const memoize = (fn) => {
+        let cache = {};
+        return (...args) => {
+          let n = args[0];  // just taking one argument here
+          if (n in cache) {
+            //console.log('Fetching from cache');
+            return cache[n];
+          }
+          else {
+            //console.log('Calculating result');
+            let result = fn(n);
+            cache[n] = result;
+            return result;
+          }
+        }
+      }
+
+      const calcLower = (vals) => (new cv.Mat(dst.rows, dst.cols, dst.type(), [vals[0], vals[1], vals[2], 0]));
+      const calcUpper = (vals) => (new cv.Mat(dst.rows, dst.cols, dst.type(), [vals[0], vals[1], vals[2], 0]));
+
+      const memoizeLower = memoize(calcLower);
+      const memoizeUpper = memoize(calcUpper);
 
     let FPS = 45;
     framesPerSecSlider.value = FPS;
@@ -238,10 +261,8 @@ function onVideoStarted() {
             frameTime+= (thisFrameTime - frameTime) / filterStrength;
             lastLoop = thisLoop;
 
-            lower = new cv.Mat(dst.rows, dst.cols, dst.type(),
-                [parseInt(hueMinSlider.value), parseInt(satMinSlider.value), parseInt(valMinSlider.value), 0]);
-            upper = new cv.Mat(dst.rows, dst.cols, dst.type(),
-                [parseInt(hueMaxSlider.value), parseInt(satMaxSlider.value), parseInt(valMaxSlider.value), 0]);
+            lower = memoizeLower([parseInt(hueMinSlider.value), parseInt(satMinSlider.value), parseInt(valMinSlider.value)]);
+            upper = memoizeUpper([parseInt(hueMaxSlider.value), parseInt(satMaxSlider.value), parseInt(valMaxSlider.value)]);
 
             hueMaxText.innerHTML = hueMaxSlider.value;
             hueMinText.innerHTML = hueMinSlider.value;
