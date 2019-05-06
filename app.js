@@ -287,8 +287,8 @@ function onVideoStarted() {
             //     dataDisplayColor.innerHTML += tr;
             // }
 
-            if (dataColorCap.length > 20) dataColorCap = []
-            if (dataMotionCap.length > 20) dataMotionCap = []
+            if (dataColorCap.length > 100) dataColorCap = []
+            if (dataMotionCap.length > 100) dataMotionCap = []
             dataDisplayColor.innerHTML = dataColorCap.map(data => JSON.stringify(data, null, 4))
             dataDisplayMotion.innerHTML = dataMotionCap.map(data => JSON.stringify(data, null, 4))
 
