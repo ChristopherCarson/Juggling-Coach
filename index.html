@@ -4,13 +4,14 @@
 <head>
 <meta charset="utf-8">
 <title>Juggling Motion Capture</title>
-<link href="style.css" rel="stylesheet" type="text/css" />
+<!--<link href="style.css" rel="stylesheet" type="text/css" /> -->
+<link href="https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/darkly/bootstrap.min.css" rel="stylesheet" integrity="sha384-w+8Gqjk9Cuo6XH9HKHG5t5I1VR4YBNdPt/29vwgfZR485eoEJZ8rJRbm3TR32P6k" crossorigin="anonymous">
 </head>
 <body>
 <h2>OpenCV.js Juggling Motion Capture</h2>
 <p id="status">OpenCV.js is loading...</p>
 <div>
-<div class="control"><button id="startAndStop" disabled>Start</button><button id="colorCapture" disabled>Capture</button></div>
+<div class="control"><button id="startAndStop" class="btn btn-primary" disabled>Start</button><button id="colorCapture" class="btn btn-primary" disabled>Capture</button></div>
 </div>
 <p class="err" id="errorMessage"></p>
 <div>
@@ -36,6 +37,8 @@
         <td></td>
     </tr>
     </table>
+</div>
+<div id="dataArea">
 </div>
 <script src="utils.js" type="text/javascript"></script>
 <script src="app.js" type="text/javascript"></script>
