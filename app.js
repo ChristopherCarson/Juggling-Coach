@@ -33,6 +33,12 @@ const framesPerSecText = document.getElementById('framesPerSecText')
 
 let canvasContext = canvasOutput.getContext('2d');
 
+const arrayLength = document.getElementById('arrayLength');
+const throwCheck = document.getElementById('throwCheck');
+
+
+let rightThrowCheck = [];
+
 // The higher this value, the less the fps will reflect temporary variations
 // A value of 1 will only keep the last value
 const filterStrength = 10;
@@ -100,6 +106,8 @@ function onVideoStarted() {
 
     let lower = null;
     let upper = null;
+
+    const maxLen = 25;
 
     streaming = true;
     startAndStop.innerText = 'Stop';
@@ -211,6 +219,7 @@ function onVideoStarted() {
             cv.dilate(colorFrame, colorFrame, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
             cv.findContours(colorFrame, contoursColor, hierarchy, 1, 2);
 
+            /*
             for (let i = 0; i < contoursColor.size(); i++) {
                 areaColor = cv.contourArea(contoursColor.get(i));
                 if (areaColor > areaThreshHoldColor) {
@@ -232,6 +241,7 @@ function onVideoStarted() {
                     }
                 }
             }
+            */
 
             for (let i = 0; i < contoursMotion.size(); i++) {
                 areaMotion = cv.contourArea(contoursMotion.get(i));
@@ -287,10 +297,23 @@ function onVideoStarted() {
             //     dataDisplayColor.innerHTML += tr;
             // }
 
-            if (dataColorCap.length > 100) dataColorCap = []
-            if (dataMotionCap.length > 100) dataMotionCap = []
-            dataDisplayColor.innerHTML = dataColorCap.map(data => JSON.stringify(data, null, 4))
-            dataDisplayMotion.innerHTML = dataMotionCap.map(data => JSON.stringify(data, null, 4))
+            if (dataColorCap.length > maxLen) dataColorCap = dataColorCap.slice(dataColorCap.length - maxLen, dataColorCap.length + 1);
+            if (dataMotionCap.length > maxLen) dataMotionCap = dataMotionCap.slice(dataMotionCap.length - maxLen, dataMotionCap.length + 1);
+            arrayLength.innerHTML = "Color: " + dataColorCap.length + "   Motion: " + dataMotionCap.length;
+
+            for (let i = 0; i < dataMotionCap.length; i++) {
+                //for right throws
+                if (dataMotionCap[i].point.x < 140 && dataMotionCap[i].point.y < 100) rightThrowCheck = 1;
+                if (dataMotionCap[i].point.x > 60 && dataMotionCap[i].point.x < 120 && dataMotionCap[i].point.y > 60 && dataMotionCap[i].point.y < 120 && rightThrowCheck === 1) rightThrowCheck = 2;
+                if (dataMotionCap[i].point.x > 120 && dataMotionCap[i].point.x < 240 && dataMotionCap[i].point.y > 120 && rightThrowCheck === 2) rightThrowCheck = 3;
+                if (dataMotionCap[i].point.x > 180 && dataMotionCap[i].point.x < 280 && dataMotionCap[i].point.y > 60 && dataMotionCap[i].point.y < 120 && rightThrowCheck === 3) rightThrowCheck = 4;
+                if (dataMotionCap[i].point.x > 180 && dataMotionCap[i].point.y < 100 && rightThrowCheck === 4) rightThrowCheck = 5;
+            }
+            
+            throwCheck.innerHTML = "Right: " + rightThrowCheck
+
+            dataDisplayColor.innerHTML = dataColorCap.map(data => JSON.stringify(data, null, 4));
+            dataDisplayMotion.innerHTML = dataMotionCap.map(data => JSON.stringify(data, null, 4));
 
             master = motionFrame.clone();
             // schedule the next one.

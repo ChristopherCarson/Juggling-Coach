@@ -1,4 +1,6 @@
 
+
+
 #container-border {
     border-width: 2px;
     border-color: blue;
@@ -8,6 +10,8 @@
 
 body, div, p {
     font: 400 14px/22px Roboto,sans-serif;
+    background-color: black;
+    color: white; 
 }
 canvas, img, video {
     border: 1px solid black;
