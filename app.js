@@ -106,15 +106,16 @@ function onVideoStarted() {
     videoInput.height = videoInput.videoHeight;
     colorCapture.disabled = false;
 
-    
     addEventListener("keydown", function (event) {
         if (event.keyCode == 99)
             dataDisplayColor.innerHTML = '';
         dataDisplayMotion.innerHTML = '';
         dataColorCap = [];
         dataMotionCap = [];
-        purgePlot();
-        createPlot();
+        purgePlot("colorScatterPlot");
+		purgePlot("motionScatterPlot");
+        createPlot("colorScatterPlot", "Color");
+		createPlot("motionScatterPlot", "Motion");
     });
 
     let FPS = 45;
@@ -183,8 +184,8 @@ function onVideoStarted() {
 
             //starting range
             if (lower == null) {
-                let hMin = 92;
-                let hMax = 99;
+                let hMin = 79;
+                let hMax = 91;
                 let sMin = 80;
                 let sMax = 133;
                 let vMin = 160;
@@ -218,21 +219,24 @@ function onVideoStarted() {
                     ballColor = cv.boundingRect(contoursColor.get(i));
                     centerColor = new cv.Point(ballColor.x + Math.round(ballColor.width / 2), ballColor.y + Math.round(ballColor.height / 2));
                     cv.circle(src, centerColor, 20, [0, 255, 0, 255], 8);
+					direction = getDirection(dataColorCap, dataFrame, centerColor);
                     if (dataColorCap.length === 0) {
                         dataColorCap.push({
                             frame: dataFrame,
                             time: new Date().getTime() - dataTimeSubtract,
-                            point: centerColor
+                            point: centerColor,
+							direction: direction
                         });
                     } else if (dataColorCap[dataColorCap.length - 1].point.x !== centerColor.x && dataColorCap[dataColorCap.length - 1].point.y !== centerColor.y) {
                         dataColorCap.push({
                             frame: dataFrame,
                             time: new Date().getTime() - dataTimeSubtract,
-                            point: centerColor
+                            point: centerColor,
+							direction: direction
                         });
                     }
                     //Add to scatterPlot
-                    addToPlot(0, (centerColor.x - (centerColor.x * 2)), (centerColor.y - (centerColor.y * 2)));
+                    addToPlot("colorScatterPlot", centerColor.x, (centerColor.y - (centerColor.y * 2)), direction);
                 }
             }
 
@@ -242,21 +246,24 @@ function onVideoStarted() {
                     ballMotion = cv.boundingRect(contoursMotion.get(i));
                     centerMotion = new cv.Point(ballMotion.x + Math.round(ballMotion.width / 2), ballMotion.y + Math.round(ballMotion.height / 2));
                     cv.circle(src, centerMotion, 20, [255, 0, 0, 255], 8);
+					direction = getDirection(dataMotionCap, dataFrame, centerMotion);
                     if (dataMotionCap.length === 0) {
                         dataMotionCap.push({
                             frame: dataFrame,
                             time: new Date().getTime() - dataTimeSubtract,
-                            point: centerMotion
+                            point: centerMotion,
+							direction: direction
                         });
                     } else if (dataMotionCap[dataMotionCap.length - 1].point.x !== centerMotion.x && dataMotionCap[dataMotionCap.length - 1].point.y !== centerMotion.y) {
                         dataMotionCap.push({
                             frame: dataFrame,
                             time: new Date().getTime() - dataTimeSubtract,
-                            point: centerMotion
+                            point: centerMotion,
+							direction: direction
                         });
                     }
                     //Add to scatterPlot
-                    addToPlot(1, (centerMotion.x - (centerMotion.x * 2)), (centerMotion.y - (centerMotion.y * 2)));
+                    addToPlot("motionScatterPlot", centerMotion.x, (centerMotion.y - (centerMotion.y * 2)), direction);
                 }
             }
 
@@ -291,8 +298,8 @@ function onVideoStarted() {
             //     tr += "<td>" + dataColorCap[i].frame + "</td>" + "<td>" + dataColorCap[i].time.toString() + "</td></tr>";
             //     dataDisplayColor.innerHTML += tr;
             // }
-
-            if (dataColorCap.length > 100) dataColorCap = []
+			
+            if (dataColorCap.length > 50) dataColorCap = []
             if (dataMotionCap.length > 100) dataMotionCap = []
             dataDisplayColor.innerHTML = dataColorCap.map(data => JSON.stringify(data, null, 4))
             dataDisplayMotion.innerHTML = dataMotionCap.map(data => JSON.stringify(data, null, 4))
