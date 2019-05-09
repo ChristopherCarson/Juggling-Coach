@@ -37,7 +37,9 @@ const arrayLength = document.getElementById('arrayLength');
 const throwCheck = document.getElementById('throwCheck');
 
 
-let rightThrowCheck = [];
+let rightThrowCheck = 0;
+let leftThrowCheck = 0;
+let throwCountDown = 0;
 
 // The higher this value, the less the fps will reflect temporary variations
 // A value of 1 will only keep the last value
@@ -107,7 +109,7 @@ function onVideoStarted() {
     let lower = null;
     let upper = null;
 
-    const maxLen = 25;
+    const maxLen = 40;
 
     streaming = true;
     startAndStop.innerText = 'Stop';
@@ -122,6 +124,9 @@ function onVideoStarted() {
         dataDisplayMotion.innerHTML = '';
         dataColorCap = [];
         dataMotionCap = [];
+        throwCheck.innerHTML = '';
+        rightThrowCheck = 0;
+        leftThrowCheck = 0;
     });
 
 
@@ -148,7 +153,7 @@ function onVideoStarted() {
       const memoizeLower = memoize(calcLower);
       const memoizeUpper = memoize(calcUpper);
 
-    let FPS = 45;
+    let FPS = 30;
     framesPerSecSlider.value = FPS;
 
     function processVideo() {
@@ -301,16 +306,26 @@ function onVideoStarted() {
             if (dataMotionCap.length > maxLen) dataMotionCap = dataMotionCap.slice(dataMotionCap.length - maxLen, dataMotionCap.length + 1);
             arrayLength.innerHTML = "Color: " + dataColorCap.length + "   Motion: " + dataMotionCap.length;
 
+            rightThrowCheck = 0;
+
             for (let i = 0; i < dataMotionCap.length; i++) {
                 //for right throws
-                if (dataMotionCap[i].point.x < 140 && dataMotionCap[i].point.y < 100) rightThrowCheck = 1;
-                if (dataMotionCap[i].point.x > 60 && dataMotionCap[i].point.x < 120 && dataMotionCap[i].point.y > 60 && dataMotionCap[i].point.y < 120 && rightThrowCheck === 1) rightThrowCheck = 2;
-                if (dataMotionCap[i].point.x > 120 && dataMotionCap[i].point.x < 240 && dataMotionCap[i].point.y > 120 && rightThrowCheck === 2) rightThrowCheck = 3;
-                if (dataMotionCap[i].point.x > 180 && dataMotionCap[i].point.x < 280 && dataMotionCap[i].point.y > 60 && dataMotionCap[i].point.y < 120 && rightThrowCheck === 3) rightThrowCheck = 4;
-                if (dataMotionCap[i].point.x > 180 && dataMotionCap[i].point.y < 100 && rightThrowCheck === 4) rightThrowCheck = 5;
+                
+                if (dataMotionCap[i].point.x < 140 && dataMotionCap[i].point.y > 160 && rightThrowCheck == 0) rightThrowCheck = 1;
+                if (dataMotionCap[i].point.x > 60 && dataMotionCap[i].point.x < 160 && dataMotionCap[i].point.y > 60 && dataMotionCap[i].point.y < 180 && rightThrowCheck === 1) rightThrowCheck = 2;
+                if (dataMotionCap[i].point.x > 120 && dataMotionCap[i].point.x < 240 && dataMotionCap[i].point.y < 120 && rightThrowCheck === 2) rightThrowCheck = 3;
+                if (dataMotionCap[i].point.x > 160 && dataMotionCap[i].point.x < 280 && dataMotionCap[i].point.y > 60 && dataMotionCap[i].point.y < 180 && rightThrowCheck === 3) rightThrowCheck = 4;
+                //if (dataMotionCap[i].point.x > 180 && dataMotionCap[i].point.y > 160 && rightThrowCheck === 4) rightThrowCheck = 5;
             }
-            
-            throwCheck.innerHTML = "Right: " + rightThrowCheck
+
+
+            throwCountDown--;
+            if (throwCountDown < 0) throwCheck.innerHTML = ""
+            if (rightThrowCheck === 4){
+                throwCountDown = 30;
+                throwCheck.innerHTML = "Right throw detected!"
+                dataMotionCap = [];
+            } 
 
             dataDisplayColor.innerHTML = dataColorCap.map(data => JSON.stringify(data, null, 4));
             dataDisplayMotion.innerHTML = dataMotionCap.map(data => JSON.stringify(data, null, 4));
