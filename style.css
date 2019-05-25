@@ -8,8 +8,37 @@
 	text-align: center;
 }
 
-#dropdownMenu{
+#dropdownMenu {
 	padding-left: 30px;
 	padding-right: 30px;
+}
+
+#centralArea {
+	padding-top: 15px;
+	padding-left: 30px;
+	padding-right: 30px;
+	height: 400px;
+	text-align: center;
+	display: inline-flex;
+	width: 100%;
+}
+
+#scatterPlotArea {
+	float: left;
+	height: 100%;
+	width:33%
+}
+
+#mainVideo {
+	float: left;
+	height: 100%;
+	width: 33%;
+	min-width: 320px;
+}
+
+#patternMatchingArea {
+	float: left;
+	height: 100%;
+	width: 33%;
 }
 
