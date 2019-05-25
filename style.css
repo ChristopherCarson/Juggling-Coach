@@ -8,6 +8,7 @@
 #status {
 	text-align: center;
 	display: inline-block;
+	padding-right:100px;
 }
 
 #logo {
@@ -40,7 +41,7 @@
 	float: left;
 	height: 100%;
 	width: 33%;
-	min-width: 320px;
+	min-width: 360px;
 }
 
 #patternMatchingArea {
