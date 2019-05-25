@@ -2,10 +2,17 @@
 	padding-top: 25px;
 	padding-left: 25px;
 	padding-right: 25px;
+	text-align: center;
 }
 
 #status {
 	text-align: center;
+	display: inline-block;
+}
+
+#logo {
+	float: left;
+	padding-top: 10px;
 }
 
 #dropdownMenu {
