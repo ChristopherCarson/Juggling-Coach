@@ -57,13 +57,17 @@ function createPlot(divName, title) {
 }
 
 function getDirection(pointArray, frame, centerPoint) {
+	//Right, Up = 1, Left, Down = 2
+	var direction = {vertical: 0, horizontal: 0};
 	nearbyPoints = [];
 	frameThreshold = 1;
 	xThreshold = 10;
+	yThreshold = 10;
 	sameDirFlag = true;
 	
+	
 	if(pointArray.length == 0) 
-		return 0;
+		return direction;
 	
 	while(nearbyPoints.length == 0 && frameThreshold != 10) {
 		nearbyPoints = pointArray.filter(function(value){
@@ -71,22 +75,26 @@ function getDirection(pointArray, frame, centerPoint) {
 					(value.point.x - centerPoint.x > -xThreshold && value.point.x - centerPoint.x < xThreshold));
 		});
 		frameThreshold += 1;
-		xThreshold += 5;
+		xThreshold += 10;
 	}
-
-	if(nearbyPoints.length == 0)
-		return 0;
+	
+	if(nearbyPoints.length == 0) 
+		return direction;
 	
 	if(nearbyPoints.length == 1) {
-		console.log("point " + nearbyPoints[0].point.y); 
 		if(nearbyPoints[0].point.y >= centerPoint.y)
-			return 1;
+			direction.vertical = 1;
 		else
-			return 2;
+			direction.vertical = 2;
+		
+		if(nearbyPoints[0].point.x >= centerPoint.x)
+			direction.horizontal = 1;
+		else
+			direction.horizontal = 2;
 	} else {
-		console.log("Directions " + nearbyPoints);
 		nearbyPoints.forEach(function (point) {
-			if(point.direction != nearbyPoints[0].direction)
+			if(point.direction.vertical != nearbyPoints[0].direction.vertical ||
+			   point.direction.horizontal != nearbyPoints[0].direction.horizontal)
 				sameDirFlag == false;
 		});
 	
@@ -94,12 +102,18 @@ function getDirection(pointArray, frame, centerPoint) {
 			return nearbyPoints[0].direction;
 		else {
 			if(nearbyPoints[0].point.y >= centerPoint.y)
-				return 1;
+				direction.vertical = 1;
 			else
-				return 2;	
-		}	
+				direction.vertical = 2;
+			
+			if(nearbyPoints[0].point.x >= centerPoint.x)
+				direction.horizontal = 1;
+			else
+				direction.horizontal = 2;
+		}
 	}
 	
+	return direction;
 }
 
 function purgePlot(divName) {

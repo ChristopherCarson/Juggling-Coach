@@ -31,9 +31,12 @@ const motionThreshText = document.getElementById('motionThreshText')
 const framesPerSecSlider = document.getElementById('framesPerSecSlider')
 const framesPerSecText = document.getElementById('framesPerSecText')
 
+let fullGrid = [];
 let canvasContext = canvasOutput.getContext('2d');
 let lower = null;
 let upper = null;
+
+var patternType = "unknown";
 
 // The higher this value, the less the fps will reflect temporary variations
 // A value of 1 will only keep the last value
@@ -79,6 +82,9 @@ function onVideoStarted() {
     let areaColor;
     let areaThreshHoldColor = 150;
 
+	let motionCount = 0;
+	let numToDisplay = 0;
+	
     colorThreshSlider.value = areaThreshHoldColor;
     motionThreshSlider.value = areaThreshHoldMotion;
 
@@ -110,6 +116,7 @@ function onVideoStarted() {
         if (event.keyCode == 99)
             dataDisplayColor.innerHTML = '';
         dataDisplayMotion.innerHTML = '';
+		motionCount = 0;
         dataColorCap = [];
         dataMotionCap = [];
         purgePlot("colorScatterPlot");
@@ -143,7 +150,6 @@ function onVideoStarted() {
 
       const memoizeLower = memoize(calcLower);
       const memoizeUpper = memoize(calcUpper);
-
 
     function processVideo() {
         try {
@@ -185,11 +191,11 @@ function onVideoStarted() {
             //starting range
             if (lower == null) {
                 let hMin = 79;
-                let hMax = 91;
-                let sMin = 80;
-                let sMax = 133;
-                let vMin = 160;
-                let vMax = 240;
+                let hMax = 94;
+                let sMin = 0;
+                let sMax = 77;
+                let vMin = 233;
+                let vMax = 255;
 
                 lower = new cv.Mat(dst.rows, dst.cols, dst.type(), [hMin, sMin, vMin, 0]);
                 upper = new cv.Mat(dst.rows, dst.cols, dst.type(), [hMax, sMax, vMax, 0]);
@@ -236,7 +242,10 @@ function onVideoStarted() {
                         });
                     }
                     //Add to scatterPlot
-                    addToPlot("colorScatterPlot", centerColor.x, (centerColor.y - (centerColor.y * 2)), direction);
+                    addToPlot("colorScatterPlot", centerColor.x, (centerColor.y - (centerColor.y * 2)), direction.vertical);
+					//Draw to canvas
+					//drawPixel(centerColor.x, centerColor.y, 0, 0, 0, 255);
+					//updateCanvas();
                 }
             }
 
@@ -247,6 +256,7 @@ function onVideoStarted() {
                     centerMotion = new cv.Point(ballMotion.x + Math.round(ballMotion.width / 2), ballMotion.y + Math.round(ballMotion.height / 2));
                     cv.circle(src, centerMotion, 20, [255, 0, 0, 255], 8);
 					direction = getDirection(dataMotionCap, dataFrame, centerMotion);
+
                     if (dataMotionCap.length === 0) {
                         dataMotionCap.push({
                             frame: dataFrame,
@@ -262,11 +272,40 @@ function onVideoStarted() {
 							direction: direction
                         });
                     }
-                    //Add to scatterPlot
-                    addToPlot("motionScatterPlot", centerMotion.x, (centerMotion.y - (centerMotion.y * 2)), direction);
+					
+					//ScatterPlot
+					addToPlot("motionScatterPlot", centerMotion.x, (centerMotion.y - (centerMotion.y * 2)),direction.horizontal);
+					motionCount++;
+
+					//Create predictions
+					if(motionCount >= 75) {
+						motionCount = 0;
+						
+						if (dataMotionCap.length >= 100) {
+							numToDisplay = dataMotionCap.length - 75;
+							//fullGrid.push(captureData(dataMotionCap.slice(numToDisplay), 320, 240, patternType)); 
+							capturedData = captureData(dataMotionCap.slice(numToDisplay), 320, 240);
+							
+							var cdArray = Object.keys(capturedData).map(function(key) {
+								return capturedData[key];
+							});
+							getPatternPrediction("model1", cdArray).then(
+								function (result) {
+									predictionText.innerHTML = "Prediction: " + result.Prediction + " Probability: " + result.Probability;
+								}
+							);
+							purgePlot("motionScatterPlot");
+							createPlot("motionScatterPlot", "Motion");
+						}
+						else 
+							numToDisplay = 0;
+						
+						purgePlot("motionScatterPlot");
+						createPlot("motionScatterPlot", "Motion");
+					}
                 }
             }
-
+			
             cv.imshow('canvasOutput', src);
 
             var thisFrameTime = (thisLoop=new Date) - lastLoop;
@@ -292,17 +331,8 @@ function onVideoStarted() {
             FPS = parseInt(framesPerSecSlider.value);
             framesPerSecText.innerHTML = framesPerSecSlider.value;
 
-
-            // for (var i = 0; i < Object.keys(dataColorCap).length; i++) {
-            //     var tr = "<tr>";
-            //     tr += "<td>" + dataColorCap[i].frame + "</td>" + "<td>" + dataColorCap[i].time.toString() + "</td></tr>";
-            //     dataDisplayColor.innerHTML += tr;
-            // }
-			
-            if (dataColorCap.length > 50) dataColorCap = []
-            if (dataMotionCap.length > 100) dataMotionCap = []
-            dataDisplayColor.innerHTML = dataColorCap.map(data => JSON.stringify(data, null, 4))
-            dataDisplayMotion.innerHTML = dataMotionCap.map(data => JSON.stringify(data, null, 4))
+            //dataDisplayColor.innerHTML = dataColorCap.map(data => JSON.stringify(data, null, 4))
+            //dataDisplayMotion.innerHTML = dataMotionCap.map(data => JSON.stringify(data, null, 4))
 
             master = motionFrame.clone();
             // schedule the next one.
@@ -331,7 +361,6 @@ utils.loadOpenCv(() => {
     colorCapture.removeAttribute('disabled');
     document.getElementById('status').innerHTML = 'OpenCV.js is ready!';
 });
-
 
 let src;
 
