@@ -1,0 +1,19 @@
+{
+  "name": "computer-juggling-coach",
+  "version": "1.0.0",
+  "description": "Capstone",
+  "main": "main.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CodeBloodedChris/Capstone.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CodeBloodedChris/Capstone/issues"
+  },
+  "homepage": "https://github.com/CodeBloodedChris/Capstone#readme"
+}

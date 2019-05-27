@@ -105,8 +105,8 @@ function onVideoStarted() {
     });
 
     function reset(){
-		motionCount = 0;
-        dataMotionCap = [];
+		//motionCount = 0;
+        //dataMotionCap = [];
 		purgePlot("motionScatterPlot");
         createPlot("motionScatterPlot", "Motion");
     }
@@ -115,6 +115,7 @@ function onVideoStarted() {
         if (result === "NONE"){
             patternText.innerHTML = "NO PATTERN"
             patternImage.src = "images/NO_PATTERN.png"
+            reset()
         }else{
         patternText.innerHTML = result.Prediction + " " + Math.round(result.Probability,0) + "%"
     
@@ -243,11 +244,12 @@ function onVideoStarted() {
             if (dataMotionCap.length>0){
                 if (new Date().getTime() - dataTimeSubtract - lastUpdate > 1000){
                     setPatternImage("NONE");
-                }else{
-                    lastUpdate = dataMotionCap[dataMotionCap.length - 1].time;
                 }
             }
 
+            if (dataMotionCap.length>0){
+                lastUpdate = dataMotionCap[dataMotionCap.length - 1].time;
+            }
 
             master = motionFrame.clone();
             // schedule the next one.
