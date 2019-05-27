@@ -11,6 +11,8 @@ function addToPlot(divName, xCoord, yCoord, trace) {
 
 function createPlot(divName, title) {
 	var layout = {
+		paper_bgcolor: 'rgba(0,0,0,0)',
+		plot_bgcolor: 'rgba(0,0,0,0)',
 		autosize: false,
 		title: {
 			text: title,
@@ -21,8 +23,8 @@ function createPlot(divName, title) {
 			xref: 'paper',
 			x: 0.05,
 		},
-		width:375,
-		height:330,
+		width:325,
+		height:300,
 		margin: {
 			l: 25,
 			r: 25,
@@ -37,22 +39,22 @@ function createPlot(divName, title) {
 	  y: [].map(rand),
 	  x: [].map(rand),
 	  mode: 'markers',
-	  line: {color:"rgb(0,255,0)"}, //'#0FE60B'
+	  line: {color:"rgb(229,139,59)"}, //'#0FE60B'
 	  name: "Unknown",
 	},
 	{
 	  y: [].map(rand),
 	  x: [].map(rand),
 	  mode: 'markers',
-	  line: {color:"rgb(0,0,255)"}, //'#0FE60B'
-	  name: "Up",
+	  line: {color:"rgb(230,59,218)"}, //'#0FE60B'
+	  name: "Left",
 	}, 
 	{
 	  y: [].map(rand),
 	  x: [].map(rand),
 	  mode: 'markers',
-	  line: {color:"rgb(255,0,0)"}, //'#0FE60B'
-	  name: "Down",	
+	  line: {color:"rgb(59,229,217)"}, //'#0FE60B'
+	  name: "Right",	
 	}], layout);
 }
 
@@ -119,6 +121,4 @@ function getDirection(pointArray, frame, centerPoint) {
 function purgePlot(divName) {
 	Plotly.purge(divName);
 }
-
-createPlot("colorScatterPlot", "Color", "#0FE60B");
 createPlot("motionScatterPlot", "Motion", "#E60B0B");

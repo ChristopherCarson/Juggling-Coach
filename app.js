@@ -4,30 +4,11 @@ let streaming = false;
 const videoInput = document.getElementById('videoInput');
 const startAndStop = document.getElementById('startAndStop');
 const canvasOutput = document.getElementById('canvasOutput');
-const dataDisplayColor = document.getElementById('dataDisplayColor');
 const dataDisplayMotion = document.getElementById('dataDisplayMotion');
+const patternText = document.getElementById('patternText');
+const patternImage = document.getElementById('patternImage');
 
 //Dev Tools
-const hueMaxSlider = document.getElementById('hueMaxSlider')
-const hueMaxText = document.getElementById('hueMaxText')
-const hueMinSlider = document.getElementById('hueMinSlider')
-const hueMinText = document.getElementById('hueMinText')
-
-const satMaxSlider = document.getElementById('satMaxSlider')
-const satMaxText = document.getElementById('satMaxText')
-const satMinSlider = document.getElementById('satMinSlider')
-const satMinText = document.getElementById('satMinText')
-
-const valMaxSlider = document.getElementById('valMaxSlider')
-const valMaxText = document.getElementById('valMaxText')
-const valMinSlider = document.getElementById('valMinSlider')
-const valMinText = document.getElementById('valMinText')
-
-const colorThreshSlider = document.getElementById('colorThreshSlider')
-const colorThreshText = document.getElementById('colorThreshText')
-const motionThreshSlider = document.getElementById('motionThreshSlider')
-const motionThreshText = document.getElementById('motionThreshText')
-
 const framesPerSecSlider = document.getElementById('framesPerSecSlider')
 const framesPerSecText = document.getElementById('framesPerSecText')
 
@@ -44,6 +25,28 @@ const filterStrength = 10;
 let frameTime = 0, lastLoop = new Date, thisLoop;
 var fpsOut = document.getElementById('fps');
 
+
+    var elem = document.getElementById("progress-bar");   
+    elem.style.width = '0%';
+
+    var width = 40;
+    var id = setInterval(frame, 10);
+
+    function frame() {
+      if (width >= 100) {
+        width++;
+          if (width >= 200){
+            clearInterval(id);
+            document.getElementById("progress").style.display = "none";
+          }
+      } else {
+        width++; 
+        elem.style.width = width + '%'; 
+      }
+    }
+
+
+
 setInterval(function(){
   fpsOut.innerHTML = (1000/frameTime).toFixed(1) + " fps";
 },1000);
@@ -52,20 +55,17 @@ startAndStop.addEventListener('click', () => {
     if (!streaming) {
         utils.clearError();
         utils.startCamera('qvga', onVideoStarted, 'videoInput');
+        document.getElementById('status').innerHTML = 'Computer Juggling Coach';
     } else {
         utils.stopCamera();
         onVideoStopped();
     }
 });
 
-colorCapture.addEventListener('click', () => {
-    capture();
-});
 
 function onVideoStarted() {
     let video = document.getElementById('videoInput');
     let src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
-    let colorFrame = new cv.Mat();
     let dst = new cv.Mat();
     let motionFrame = new cv.Mat();
     let diff = new cv.Mat();
@@ -77,19 +77,9 @@ function onVideoStarted() {
     let areaMotion;
     let areaThreshHoldMotion = 2000;
 
-    let ballColor;
-    let centerColor;
-    let areaColor;
-    let areaThreshHoldColor = 150;
-
 	let motionCount = 0;
 	let numToDisplay = 0;
-	
-    colorThreshSlider.value = areaThreshHoldColor;
-    motionThreshSlider.value = areaThreshHoldMotion;
 
-    colorThreshText.innerHTML = colorThreshSlider.value;
-    motionThreshText.innerHTML = motionThreshSlider.value;
 
     let cap = new cv.VideoCapture(video);
     let ksize = new cv.Size(21, 21);
@@ -98,72 +88,64 @@ function onVideoStarted() {
     let anchor = new cv.Point(-1, -1);
     let M = cv.Mat.ones(5, 5, cv.CV_8U);
     let contoursMotion = new cv.MatVector();
-    let contoursColor = new cv.MatVector();
     let hierarchy = new cv.Mat();
-
-    let dataColorCap = [];
     let dataMotionCap = [];
     let dataTimeSubtract = new Date().getTime()
     let dataFrame = 1;
+    let lastUpdate = 0;
 
     streaming = true;
     startAndStop.innerText = 'Stop';
     videoInput.width = videoInput.videoWidth;
     videoInput.height = videoInput.videoHeight;
-    colorCapture.disabled = false;
 
     addEventListener("keydown", function (event) {
         if (event.keyCode == 99)
-            dataDisplayColor.innerHTML = '';
-        dataDisplayMotion.innerHTML = '';
-		motionCount = 0;
-        dataColorCap = [];
-        dataMotionCap = [];
-        purgePlot("colorScatterPlot");
-		purgePlot("motionScatterPlot");
-        createPlot("colorScatterPlot", "Color");
-		createPlot("motionScatterPlot", "Motion");
+        reset()
     });
 
-    let FPS = 45;
-    framesPerSecSlider.value = FPS;
+    function reset(){
+		motionCount = 0;
+        dataMotionCap = [];
+		purgePlot("motionScatterPlot");
+        createPlot("motionScatterPlot", "Motion");
+    }
 
-    const memoize = (fn) => {
-        let cache = {};
-        return (...args) => {
-          let n = args[0];  // just taking one argument here
-          if (n in cache) {
-            //console.log('Fetching from cache');
-            return cache[n];
-          }
-          else {
-            //console.log('Calculating result');
-            let result = fn(n);
-            cache[n] = result;
-            return result;
-          }
+    function setPatternImage(result){
+        if (result === "NONE"){
+            patternText.innerHTML = "NO PATTERN"
+            patternImage.src = "images/NO_PATTERN.png"
+        }else{
+        patternText.innerHTML = result.Prediction + " " + Math.round(result.Probability,0) + "%"
+    
+            if (result.Prediction === "Cascade"){
+                patternImage.src = "images/CASCADE.gif"
+            }else if (result.Prediction === "Reverse Cascade"){
+                patternImage.src = "images/REVERSE_CASCADE.gif"
+            }else if (result.Prediction === "Shower"){
+                patternImage.src = "images/SHOWER.gif"
+            }else if (result.Prediction === "Reverse Shower"){
+                patternImage.src = "images/REVERSE_SHOWER.gif"
+            }else if (result.Prediction === "Mills Mess"){
+                patternImage.src = "images/MILLS_MESS.gif"
+            }
         }
-      }
+    }
 
-      const calcLower = (vals) => (new cv.Mat(dst.rows, dst.cols, dst.type(), [vals[0], vals[1], vals[2], 0]));
-      const calcUpper = (vals) => (new cv.Mat(dst.rows, dst.cols, dst.type(), [vals[0], vals[1], vals[2], 0]));
+    let FPS = 45;
 
-      const memoizeLower = memoize(calcLower);
-      const memoizeUpper = memoize(calcUpper);
 
     function processVideo() {
         try {
             if (!streaming) {
                 // clean and stop.
                 src.delete();
-                colorFrame.delete();
                 dst.delete();
                 motionFrame.delete();
                 diff.delete();
                 thresh.delete();
                 M.delete();
                 contoursMotion.delete();
-                contoursColor.delete();
                 hierarchy.delete();
 
                 return;
@@ -186,76 +168,22 @@ function onVideoStarted() {
             cv.threshold(diff, thresh, 15, 255, cv.THRESH_BINARY)
             cv.dilate(thresh, thresh, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
             cv.findContours(thresh, contoursMotion, hierarchy, 1, 2);
-            cv.cvtColor(src, dst, cv.COLOR_BGR2HSV);
 
-            //starting range
-            if (lower == null) {
-                let hMin = 79;
-                let hMax = 94;
-                let sMin = 0;
-                let sMax = 77;
-                let vMin = 233;
-                let vMax = 255;
-
-                lower = new cv.Mat(dst.rows, dst.cols, dst.type(), [hMin, sMin, vMin, 0]);
-                upper = new cv.Mat(dst.rows, dst.cols, dst.type(), [hMax, sMax, vMax, 0]);
-
-                hueMaxSlider.value = hMax;
-                hueMinSlider.value = hMin;
-                satMaxSlider.value = sMax;
-                satMinSlider.value = sMin;
-                valMaxSlider.value = vMax;
-                valMinSlider.value = vMin;
-
-                hueMaxText.innerHTML = hMax;
-                hueMinText.innerHTML = hMin;
-                satMaxText.innerHTML = sMax;
-                satMinText.innerHTML = sMin;
-                valMaxText.innerHTML = vMax;
-                valMinText.innerHTML = vMin;
-            }
-
-            cv.inRange(dst, lower, upper, colorFrame);
-            cv.dilate(colorFrame, colorFrame, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
-            cv.findContours(colorFrame, contoursColor, hierarchy, 1, 2);
-
-            for (let i = 0; i < contoursColor.size(); i++) {
-                areaColor = cv.contourArea(contoursColor.get(i));
-                if (areaColor > areaThreshHoldColor) {
-                    ballColor = cv.boundingRect(contoursColor.get(i));
-                    centerColor = new cv.Point(ballColor.x + Math.round(ballColor.width / 2), ballColor.y + Math.round(ballColor.height / 2));
-                    cv.circle(src, centerColor, 20, [0, 255, 0, 255], 8);
-					direction = getDirection(dataColorCap, dataFrame, centerColor);
-                    if (dataColorCap.length === 0) {
-                        dataColorCap.push({
-                            frame: dataFrame,
-                            time: new Date().getTime() - dataTimeSubtract,
-                            point: centerColor,
-							direction: direction
-                        });
-                    } else if (dataColorCap[dataColorCap.length - 1].point.x !== centerColor.x && dataColorCap[dataColorCap.length - 1].point.y !== centerColor.y) {
-                        dataColorCap.push({
-                            frame: dataFrame,
-                            time: new Date().getTime() - dataTimeSubtract,
-                            point: centerColor,
-							direction: direction
-                        });
-                    }
-                    //Add to scatterPlot
-                    addToPlot("colorScatterPlot", centerColor.x, (centerColor.y - (centerColor.y * 2)), direction.vertical);
-					//Draw to canvas
-					//drawPixel(centerColor.x, centerColor.y, 0, 0, 0, 255);
-					//updateCanvas();
-                }
-            }
 
             for (let i = 0; i < contoursMotion.size(); i++) {
                 areaMotion = cv.contourArea(contoursMotion.get(i));
                 if (areaMotion > areaThreshHoldMotion) {
                     ballMotion = cv.boundingRect(contoursMotion.get(i));
                     centerMotion = new cv.Point(ballMotion.x + Math.round(ballMotion.width / 2), ballMotion.y + Math.round(ballMotion.height / 2));
-                    cv.circle(src, centerMotion, 20, [255, 0, 0, 255], 8);
-					direction = getDirection(dataMotionCap, dataFrame, centerMotion);
+                    
+                    direction = getDirection(dataMotionCap, dataFrame, centerMotion);
+                    if (direction.horizontal === 1){
+                        cv.circle(src, centerMotion, 20, [230,59,218, 255], 8);
+                    }else if (direction.horizontal === 2){
+                        cv.circle(src, centerMotion, 20, [59,229,217, 255], 8);
+                    }else{
+                        cv.circle(src, centerMotion, 20, [229,139,59, 255], 8);
+                    }
 
                     if (dataMotionCap.length === 0) {
                         dataMotionCap.push({
@@ -291,7 +219,7 @@ function onVideoStarted() {
 							});
 							getPatternPrediction("model1", cdArray).then(
 								function (result) {
-									predictionText.innerHTML = "Prediction: " + result.Prediction + " Probability: " + result.Probability;
+                                    setPatternImage(result)
 								}
 							);
 							purgePlot("motionScatterPlot");
@@ -312,27 +240,14 @@ function onVideoStarted() {
             frameTime+= (thisFrameTime - frameTime) / filterStrength;
             lastLoop = thisLoop;
 
-            lower = memoizeLower([parseInt(hueMinSlider.value), parseInt(satMinSlider.value), parseInt(valMinSlider.value)]);
-            upper = memoizeUpper([parseInt(hueMaxSlider.value), parseInt(satMaxSlider.value), parseInt(valMaxSlider.value)]);
+            if (dataMotionCap.length>0){
+                if (new Date().getTime() - dataTimeSubtract - lastUpdate > 1000){
+                    setPatternImage("NONE");
+                }else{
+                    lastUpdate = dataMotionCap[dataMotionCap.length - 1].time;
+                }
+            }
 
-            hueMaxText.innerHTML = hueMaxSlider.value;
-            hueMinText.innerHTML = hueMinSlider.value;
-            satMaxText.innerHTML = satMaxSlider.value;
-            satMinText.innerHTML = satMinSlider.value;
-            valMaxText.innerHTML = valMaxSlider.value;
-            valMinText.innerHTML = valMinSlider.value;
-
-            areaThreshHoldColor = parseInt(colorThreshSlider.value);
-            areaThreshHoldMotion = parseInt(motionThreshSlider.value);
- 
-            colorThreshText.innerHTML = colorThreshSlider.value;
-            motionThreshText.innerHTML = motionThreshSlider.value;
-
-            FPS = parseInt(framesPerSecSlider.value);
-            framesPerSecText.innerHTML = framesPerSecSlider.value;
-
-            //dataDisplayColor.innerHTML = dataColorCap.map(data => JSON.stringify(data, null, 4))
-            //dataDisplayMotion.innerHTML = dataMotionCap.map(data => JSON.stringify(data, null, 4))
 
             master = motionFrame.clone();
             // schedule the next one.
@@ -353,113 +268,10 @@ function onVideoStarted() {
 function onVideoStopped() {
     streaming = false;
     startAndStop.innerText = 'Start';
-    colorCapture.disabled = true;
 }
 
 utils.loadOpenCv(() => {
     startAndStop.removeAttribute('disabled');
-    colorCapture.removeAttribute('disabled');
-    document.getElementById('status').innerHTML = 'OpenCV.js is ready!';
+    document.getElementById('status').innerHTML = 'Press the start button below to begin!';
 });
 
-let src;
-
-function capture() {
-
-    const colorPickerXoffset = 351;
-    const colorPickerYoffset = 146;
-    var canvas = document.getElementById('canvasOutput');
-    var ctx = canvas.getContext('2d');
-    var rect = {};
-    var drag = false;
-    colorCapture.disabled = true;
-
-    src = new cv.Mat(240, 320, cv.CV_8UC4);
-    let video = document.getElementById('videoInput');
-    let cap = new cv.VideoCapture(video);
-    cap.read(src);
-    utils.stopCamera();
-    onVideoStopped();
-
-    canvas.addEventListener('mousedown', mouseDown, false);
-    canvas.addEventListener('mouseup', mouseUp, false);
-    canvas.addEventListener('mousemove', mouseMove, false);
-    //to draw on Canvas
-    function mouseDown(e) {
-        if (e.which == 1) {
-            rect.startX = e.pageX - colorPickerXoffset;
-            rect.startY = e.pageY - colorPickerYoffset;
-            drag = true;
-        }
-    }
-
-    function mouseUp() {
-        drag = false;
-    }
-
-    function mouseMove(e) {
-        if (drag) {
-            try {
-
-                ctx.clearRect(rect.startX, rect.startY, rect.w, rect.h);
-                cv.imshow('canvasOutput', src);
-                rect.w = (e.pageX - colorPickerXoffset) - rect.startX;
-                rect.h = (e.pageY - colorPickerYoffset) - rect.startY;
-                ctx.strokeStyle = 'red';
-                ctx.strokeRect(rect.startX, rect.startY, rect.w, rect.h);
-                let dst = new cv.Mat();
-                let rectCV = new cv.Rect(rect.startX, rect.startY, rect.w, rect.h);
-                dst = src.roi(rectCV);
-
-                var res = new cv.Mat();
-                cv.cvtColor(dst, res, cv.COLOR_BGR2HSV, 0);
-
-                let rgbaPlanes = new cv.MatVector()
-                // Split the Mat
-                cv.split(res, rgbaPlanes);
-                // Get R channel
-                let H = rgbaPlanes.get(0);
-                let S = rgbaPlanes.get(1);
-                let V = rgbaPlanes.get(2);
-                let minMaxH = cv.minMaxLoc(H);
-                let minMaxS = cv.minMaxLoc(S);
-                let minMaxV = cv.minMaxLoc(V);
-                //Get the HSV values
-                console.log("MinH MaxH MinS MaxS MinV MaxV", minMaxH.minVal, minMaxH.maxVal, minMaxS.minVal, minMaxS.maxVal,
-                    minMaxV.minVal, minMaxV.maxVal);
-                //Now try extracting the HSV out
-                var frame_HSV = new cv.Mat();
-                cv.cvtColor(src, frame_HSV, cv.COLOR_BGR2HSV)
-                //console.log(frame_HSV.rows, frame_HSV.cols, frame_HSV.type())
-                lower = new cv.Mat(frame_HSV.rows, frame_HSV.cols, frame_HSV.type(),
-                    [minMaxH.minVal, minMaxS.minVal, minMaxV.minVal, 0]);
-                upper = new cv.Mat(frame_HSV.rows, frame_HSV.cols, frame_HSV.type(),
-                    [minMaxH.maxVal, minMaxS.maxVal, minMaxV.maxVal, 250]);
-
-                hueMaxSlider.value = minMaxH.maxVal;
-                hueMinSlider.value = minMaxH.minVal;
-                satMaxSlider.value = minMaxS.maxVal;
-                satMinSlider.value = minMaxS.minVal;
-                valMaxSlider.value = minMaxV.maxVal;
-                valMinSlider.value = minMaxV.minVal;
-
-                hueMaxText.innerHTML = minMaxH.maxVal;
-                hueMinText.innerHTML = minMaxH.minVal;
-                satMaxText.innerHTML = minMaxS.maxVal;
-                satMinText.innerHTML = minMaxS.minVal;
-                valMaxText.innerHTML = minMaxV.maxVal;
-                valMinText.innerHTML = minMaxV.minVal;
-
-                dst.delete();
-                cap.delete();
-                rgbaPlanes.delete();
-                frame_HSV.delete();
-
-            } catch (err) {
-                console.log("Error: ", err.message)
-            }
-        }
-
-    }
-
-};

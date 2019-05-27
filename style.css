@@ -1,66 +1,59 @@
+#heading {
+	padding-top: 25px;
+	padding-left: 25px;
+	padding-right: 25px;
+	text-align: center;
+}
 
-#container-border {
-    border-width: 2px;
-    border-color: blue;
-    border-style: dashed;
-    width: 650px;
-  }
+#status {
+	text-align: center;
+	display: inline-block;
+	padding-right:100px;
+}
 
-body, div, p {
-    font: 400 14px/22px Roboto,sans-serif;
+#logo {
+	float: left;
+	padding-top: 10px;
 }
-canvas, img, video {
-    border: 1px solid black;
+
+#dropdownMenu {
+	padding-left: 30px;
+	padding-right: 30px;
 }
-td {
-    padding: 10px 0px 0px 10px;
-    text-align: center;
+
+#centralArea {
+	padding-top: 15px;
+	padding-left: 30px;
+	padding-right: 30px;
+	height: 400px;
+	text-align: center;
+	display: inline-flex;
+	width: 100%;
 }
-button {
-    display: inline-block;
-    color: #fff;
-    background-color: #337ab7;
-    border-color: #2e6da4;
-    padding: 6px 12px;
-    margin-bottom: 0;
-    font-size: 14px;
-    font-weight: bold;
-    text-align: center;
-    white-space: nowrap;
-    vertical-align: middle;
-    -ms-touch-action: manipulation;
-    touch-action: manipulation;
-    cursor: pointer;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    background-image: none;
-    border: 1px solid transparent;
-    border-radius: 4px;
+
+#scatterPlotArea {
+	float: left;
+	height: 100%;
+	width:33%
 }
-button[disabled] {
-    cursor: not-allowed;
-    filter: alpha(opacity=65);
-    -webkit-box-shadow: none;
-    box-shadow: none;
-    opacity: .65;
+
+#mainVideo {
+	float: left;
+	height: 100%;
+	width: 33%;
+	min-width: 360px;
 }
-.control {
-    margin-bottom: 3px;
+
+#patternMatchingArea {
+	float: left;
+	height: 100%;
+	width: 33%;
 }
-.err {
-    color: red;
-    font-weight: bold;
+
+.display {
+    color: #17D4FE;
+    font-size: 32px;
+    font-family: Orbitron;
+    letter-spacing: 7px;
 }
-.inputoutput {
-    margin-top: 1em;
-    margin-bottom: 1em;
-}
-.caption {
-    margin: 0;
-    font-weight: bold;
-}
-.hidden {
-    display: none;
-}
+
