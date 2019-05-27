@@ -30,7 +30,7 @@ var fpsOut = document.getElementById('fps');
 
     var width = 40;
     elem.style.width = width + '%'; 
-    var id = setInterval(frame, 10);
+    
 
 
 setInterval(function(){
@@ -262,6 +262,7 @@ utils.loadOpenCv(() => {
     startAndStop.removeAttribute('disabled');
     document.getElementById('status').innerHTML = 'Press the start button below to begin!';
 
+    var id = setInterval(frame, 10);
     function frame() {
         if (width >= 100) {
           width++;
