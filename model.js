@@ -12,7 +12,7 @@ async function load_model(modelName) {
 async function getPatternPrediction(modelName, data) {
 	model = await tf.loadLayersModel('localstorage://' + modelName);
 	console.log(data);
-	const class_names = ['Cascade', 'Reverse Cascade', 'Shower'];
+	const class_names = ['Cascade', 'Reverse Cascade', 'Shower', 'Mills Mess', 'Unknown Pattern'];
 	
 	var tensorData = tf.tensor([data]);
 
