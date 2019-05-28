@@ -7,7 +7,7 @@
 <link href="style.css" rel="stylesheet" type="text/css" />
 <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/darkly/bootstrap.min.css" rel="stylesheet" integrity="sha384-w+8Gqjk9Cuo6XH9HKHG5t5I1VR4YBNdPt/29vwgfZR485eoEJZ8rJRbm3TR32P6k" crossorigin="anonymous">
 </head>
-<body>
+<body onload="load_model()">
 <div id="heading">
 	<div class="progress" id="progress">
 		<div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"  aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
@@ -17,16 +17,6 @@
 	<div id="logo">
 		<img style="border-radius: 15px;" src="images/LOGO.png">
 	</div>
-
-	<div class="control"> 
-		<button id="loadModel">LoadModel</button>
-  <input type="file"
-	   name="model JSON"
-       id="json-upload" name="model"
-       accept="application/json">
-  <input type="file" id="weights-upload" name="Weight">
-    </div>
-
 </div>
 
 <div id="centralArea">
