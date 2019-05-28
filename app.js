@@ -28,9 +28,17 @@ var fpsOut = document.getElementById('fps');
 
     var elem = document.getElementById("progress-bar");   
 
-    var width = 40;
+    var width = 0;
     elem.style.width = width + '%'; 
-    
+    var id1 = setInterval(frame, 10);
+    function frame() {
+        if (width >= 80) {
+              clearInterval(id1);
+        } else {
+          width++; 
+          elem.style.width = width + '%'; 
+        }
+      }
 
 
 setInterval(function(){
@@ -262,12 +270,12 @@ utils.loadOpenCv(() => {
     startAndStop.removeAttribute('disabled');
     document.getElementById('status').innerHTML = 'Press the start button below to begin!';
 
-    var id = setInterval(frame, 10);
+    var id2 = setInterval(frame, 10);
     function frame() {
         if (width >= 100) {
           width++;
             if (width >= 200){
-              clearInterval(id);
+              clearInterval(id2);
               document.getElementById("progress").style.display = "none";
             }
         } else {
@@ -275,7 +283,5 @@ utils.loadOpenCv(() => {
           elem.style.width = width + '%'; 
         }
       }
-
-
 });
 
