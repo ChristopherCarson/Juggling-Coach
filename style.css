@@ -34,7 +34,7 @@
 #scatterPlotArea {
 	float: left;
 	height: 100%;
-	width:33%
+	width:33%;
 }
 
 #mainVideo {
@@ -54,6 +54,7 @@
     color: #17D4FE;
     font-size: 32px;
     font-family: Orbitron;
-    letter-spacing: 7px;
+	letter-spacing: 7px;
+
 }
 

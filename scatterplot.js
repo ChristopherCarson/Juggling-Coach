@@ -14,11 +14,17 @@ function createPlot(divName, title) {
 		paper_bgcolor: 'rgba(0,0,0,0)',
 		plot_bgcolor: 'rgba(0,0,0,0)',
 		autosize: false,
+		font: {
+			family: 'Courier New, monospace',
+			size: 12,
+			color: '#ffffff'
+		},
 		title: {
 			text: title,
 			font: {
 				family: 'Courier New, monospace',
-				size: 12
+				size: 12,
+				color: '#ffffff'
 			},
 			xref: 'paper',
 			x: 0.05,

@@ -1,3 +1,23 @@
+async function load_model_hosted(modelName) {
+	if (local == false) {
+	const model = await tf.loadLayersModel("model.json", "group1-shard1of1");
+	model.summary();
+	await model.save('localstorage://model1');
+	}else{
+		document.getElementById('manual-file-loader').innerHTML = `
+		<button id="loadModel">LoadModel</button>
+		<input type="file"
+			 name="model JSON"
+			 id="json-upload" name="model"
+			 accept="application/json">
+		<input type="file" id="weights-upload" name="Weight">`
+
+		loadModel.addEventListener('click', () => {
+			load_model("model1");
+		});
+	}
+}
+
 async function load_model(modelName) {
 	const jsonUpload = document.getElementById('json-upload');
 	const weightsUpload = document.getElementById('weights-upload');
@@ -26,6 +46,4 @@ async function getPatternPrediction(modelName, data) {
 	return pred;
 }
 
-loadModel.addEventListener('click', () => {
-	load_model("model1");
-});
+
