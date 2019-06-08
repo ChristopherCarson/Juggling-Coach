@@ -123,8 +123,6 @@ function onVideoStarted() {
                 patternImage.src = "images/REVERSE_SHOWER.gif"
             }else if (result.Prediction === "Mills Mess"){
                 patternImage.src = "images/MILLS_MESS.gif"
-            }else if (result.Prediction === "Unknown Pattern"){
-                patternImage.src = "images/UNKNOWN.png"
             }
         }
     }

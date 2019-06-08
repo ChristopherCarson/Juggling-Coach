@@ -1,5 +1,10 @@
-async function load_model() {
-	const model = await tf.loadLayersModel("model.json", "group1-shard1of1");
+async function load_model(modelName) {
+	const jsonUpload = document.getElementById('json-upload');
+	const weightsUpload = document.getElementById('weights-upload');
+
+	const model = await tf.loadLayersModel(
+		tf.io.browserFiles([jsonUpload.files[0], weightsUpload.files[0]]));
+	
 	model.summary();
 	await model.save('localstorage://model1');
 }
@@ -7,7 +12,7 @@ async function load_model() {
 async function getPatternPrediction(modelName, data) {
 	model = await tf.loadLayersModel('localstorage://' + modelName);
 	console.log(data);
-	const class_names = ['Cascade', 'Reverse Cascade', 'Shower', 'Mills Mess', 'Unknown Pattern'];
+	const class_names = ['Cascade', 'Reverse Cascade', 'Shower'];
 	
 	var tensorData = tf.tensor([data]);
 
@@ -21,3 +26,6 @@ async function getPatternPrediction(modelName, data) {
 	return pred;
 }
 
+loadModel.addEventListener('click', () => {
+	load_model("model1");
+});
