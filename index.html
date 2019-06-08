@@ -71,18 +71,16 @@
 	
 </div>
 <div id="dropdownMenu">
-	<ul class="nav nav-tabs">
-	  <li class="nav-item">
-		<a class="nav-link active" data-toggle="tab" href="#home">Home</a>
+	<ul class="nav nav-tabs" role="tablist">
+	  <li class="active">
+		<a href="#home" role="tab" class="nav-link active" data-toggle="tab" >Home</a>
 	  </li>
 	  <li class="nav-item dropdown">
 		<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Lessons</a>
 		<div class="dropdown-menu" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 41px, 0px);">
-		  <a class="dropdown-item" href="#">Action</a>
-		  <a class="dropdown-item" href="#">Another action</a>
-		  <a class="dropdown-item" href="#">Something else here</a>
-		  <div class="dropdown-divider"></div>
-		  <a class="dropdown-item" href="#">Separated link</a>
+		  <a href="#dropdown1" class="dropdown-item" role="tab" data-toggle="tab">Action</a>
+		  <a href="#dropdown2" class="dropdown-item" role="tab" data-toggle="tab">Another action</a>
+		  <a href="#dropdown3" class="dropdown-item" role="tab" data-toggle="tab">Something else here</a>
 		</div>
 	  </li>
 	</ul>
@@ -104,6 +102,9 @@
 	  <div class="tab-pane fade" id="dropdown2">
 		<p>Trust fund seitan letterpress, keytar raw denim keffiyeh etsy art party before they sold out master cleanse gluten-free squid scenester freegan cosby sweater. Fanny pack portland seitan DIY, art party locavore wolf cliche high life echo park Austin. Cred vinyl keffiyeh DIY salvia PBR, banh mi before they sold out farm-to-table VHS viral locavore cosby sweater.</p>
 	  </div>
+	  <div class="tab-pane fade" id="dropdown3">
+		<p>Look I added some stuff!</p>
+	  </div>
 	</div>
 </div>
 <script src="utils.js" type="text/javascript"></script>
@@ -116,6 +117,15 @@
 <script src="scatterplot.js" type="text/javascript"></script>
 <script src="model.js" type="text/javascript"></script>
 <script src="captureData.js" type="text/javascript"></script>
+
+<script>
+
+$(".nav a").on("click", function(){
+  $(".nav").find(".active").removeClass("active");
+  $(this).parent().addClass("active");
+});
+
+</script>
 
 </body>
 </html>
