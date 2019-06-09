@@ -12,15 +12,20 @@ var local = false;
 <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/darkly/bootstrap.min.css" rel="stylesheet" integrity="sha384-w+8Gqjk9Cuo6XH9HKHG5t5I1VR4YBNdPt/29vwgfZR485eoEJZ8rJRbm3TR32P6k" crossorigin="anonymous">
 </head>
 <body onload="load_model_hosted()">
-<div id="heading">
+<div id="logo" style="display:inline;">
+	<img style="border-radius: 15px;" src="images/LOGO.png" width='150px'>
+</div>
+<div id="heading" style="white-space:nowrap">
+	
 	<div class="progress" id="progress">
 		<div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"  aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
 	</div>
-	<h2 id="status">Juggling Coach is loading...</h2>
-	<p class="err" id="errorMessage"></p>
-	<div id="logo">
-		<img style="border-radius: 15px;" src="images/LOGO.png" width='150px'>
+	
+	<div id="text" style="display:inline; white-space:nowrap;">
+		<h2 id="status">Juggling Coach is loading...</h2>
 	</div>
+	<p class="err" id="errorMessage"></p>
+	
 	<div id="manual-file-loader"></div>
 </div>
 
@@ -102,13 +107,28 @@ var local = false;
 		</div>
 	  </div>
 	  <div class="tab-pane fade" id="dropdown1">
-		<p>Etsy mixtape wayfarers, ethical wes anderson tofu before they sold out mcsweeney's organic lomo retro fanny pack lo-fi farm-to-table readymade. Messenger bag gentrify pitchfork tattooed craft beer, iphone skateboard locavore carles etsy salvia banksy hoodie helvetica. DIY synth PBR banksy irony. Leggings gentrify squid 8-bit cred pitchfork.</p>
+		<div class="jumbotron">
+		  <h1 class="display-3">Hello, world!</h1>
+		  <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
+		  <hr class="my-4">
+		  <p>Etsy mixtape wayfarers, ethical wes anderson tofu before they sold out mcsweeney's organic lomo retro fanny pack lo-fi farm-to-table readymade. Messenger bag gentrify pitchfork tattooed craft beer, iphone skateboard locavore carles etsy salvia banksy hoodie helvetica. DIY synth PBR banksy irony. Leggings gentrify squid 8-bit cred pitchfork.</p>
+	  </div>
 	  </div>
 	  <div class="tab-pane fade" id="dropdown2">
-		<p>Trust fund seitan letterpress, keytar raw denim keffiyeh etsy art party before they sold out master cleanse gluten-free squid scenester freegan cosby sweater. Fanny pack portland seitan DIY, art party locavore wolf cliche high life echo park Austin. Cred vinyl keffiyeh DIY salvia PBR, banh mi before they sold out farm-to-table VHS viral locavore cosby sweater.</p>
+	  <div class="jumbotron">
+		  <h1 class="display-3">Hello, world!</h1>
+		  <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
+		  <hr class="my-4">
+		  <p>Trust fund seitan letterpress, keytar raw denim keffiyeh etsy art party before they sold out master cleanse gluten-free squid scenester freegan cosby sweater. Fanny pack portland seitan DIY, art party locavore wolf cliche high life echo park Austin. Cred vinyl keffiyeh DIY salvia PBR, banh mi before they sold out farm-to-table VHS viral locavore cosby sweater.</p>
+	  </div>
 	  </div>
 	  <div class="tab-pane fade" id="dropdown3">
-		<p>Look I added some stuff!</p>
+	  <div class="jumbotron">
+		  <h1 class="display-3">Hello, world!</h1>
+		  <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
+		  <hr class="my-4">
+		  <p>Look I added some stuff!</p>		  
+	  </div>
 	  </div>
 	</div>
 </div>
