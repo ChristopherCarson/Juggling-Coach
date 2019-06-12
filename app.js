@@ -7,6 +7,7 @@ const canvasOutput = document.getElementById('canvasOutput');
 const dataDisplayMotion = document.getElementById('dataDisplayMotion');
 const patternText = document.getElementById('patternText');
 const patternImage = document.getElementById('patternImage');
+const throwInfo = document.getElementById('throws');
 
 //Dev Tools
 const framesPerSecSlider = document.getElementById('framesPerSecSlider')
@@ -88,21 +89,29 @@ function onVideoStarted() {
     let dataFrame = 1;
     let lastUpdate = 0;
 
+    let throwData = [];
+    let rightCount = 0;
+    let leftCount = 0;
+    let rightThrowTimer = 0;
+    let leftThrowTimer = 0;
+    let rightFlag = 0;
+    let leftFlag = 0;
+
+    let totals = []
+
     streaming = true;
     startAndStop.innerText = 'Stop';
     videoInput.width = videoInput.videoWidth;
     videoInput.height = videoInput.videoHeight;
 
-    addEventListener("keydown", function (event) {
-        if (event.keyCode == 99)
-        reset()
-    });
 
     function reset(){
 		//motionCount = 0;
         //dataMotionCap = [];
 		purgePlot("motionScatterPlot");
         createPlot("motionScatterPlot", "Motion");
+        leftCount = 0;
+        rightCount = 0;
     }
 
     function setPatternImage(result){
@@ -187,8 +196,20 @@ function onVideoStarted() {
                             point: centerMotion,
 							direction: direction
                         });
+                        throwData.push({
+                            frame: dataFrame,
+                            time: new Date().getTime() - dataTimeSubtract,
+                            point: centerMotion,
+							direction: direction
+                        });
                     } else if (dataMotionCap[dataMotionCap.length - 1].point.x !== centerMotion.x && dataMotionCap[dataMotionCap.length - 1].point.y !== centerMotion.y) {
                         dataMotionCap.push({
+                            frame: dataFrame,
+                            time: new Date().getTime() - dataTimeSubtract,
+                            point: centerMotion,
+							direction: direction
+                        });
+                        throwData.push({
                             frame: dataFrame,
                             time: new Date().getTime() - dataTimeSubtract,
                             point: centerMotion,
@@ -228,7 +249,44 @@ function onVideoStarted() {
 					}
                 }
             }
-			
+
+            //remove data that is over 300 milliseonds old
+            if (throwData.length > 0){
+                var index = 0
+                while ((new Date().getTime() - dataTimeSubtract) - throwData[index].time > 200){
+                    index++
+                    if (index = throwData.length) break
+                }
+                throwData = throwData.slice(index, throwData.length + 1)
+            }
+
+            for (let i = 0; i < throwData.length; i++) {
+                if (throwData[i].point.y < 200 && throwData[i].direction.horizontal === 1){
+                    leftFlag++
+                    //throwData[i].point.y = 201
+                } 
+                if (throwData[i].point.y < 200 && throwData[i].direction.horizontal === 2){
+                    rightFlag++
+                    //throwData[i].point.y = 201
+                }
+            }
+
+            if (leftFlag > 2 && leftThrowTimer < 0){
+                leftThrowTimer = 10
+                leftCount++
+             }
+            if (rightFlag > 2 && rightThrowTimer < 0){
+                rightThrowTimer = 10
+                rightCount++
+            }
+
+            leftThrowTimer--
+            rightThrowTimer--
+            leftFlag = 0
+            rightFlag = 0
+            
+            throwInfo.innerHTML = 'LEFT: '+leftCount+'  RIGHT: '+rightCount
+
             cv.imshow('canvasOutput', src);
 
             var thisFrameTime = (thisLoop=new Date) - lastLoop;
