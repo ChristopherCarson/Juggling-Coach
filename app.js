@@ -26,7 +26,6 @@ const filterStrength = 10;
 let frameTime = 0, lastLoop = new Date, thisLoop;
 var fpsOut = document.getElementById('fps');
 
-
     var elem = document.getElementById("progress-bar");   
 
     var width = 0;
@@ -57,6 +56,48 @@ startAndStop.addEventListener('click', () => {
     }
 });
 
+//Training Mode Options
+var trainingMode = false;
+var trainingOn = false;
+var trainingData = [];
+addEventListener("keydown", function (event) {
+	//T = toggle training mode;
+	if(event.keyCode == 84) {
+		trainingOn = !trainingMode;
+		trainingMode = !trainingMode;
+		trainingData = [];
+		console.log("Training Mode: " + trainingMode);
+	}
+	
+	//L = Get trainingData length 
+	if(event.keyCode == 76 && trainingMode) 
+		console.log("Training Datat Count: " + trainingData.length);
+	
+	//P = Pause & Unpause Training Mode
+	if(event.keyCode == 80 && trainingMode) {
+		trainingOn = !trainingOn;
+		console.log("Training Paused: " + !trainingOn);
+	}
+	
+	//R = Remove last 100 training records.
+	if(event.keyCode == 82 && trainingMode) {
+		trainingData = trainingData.slice(0,-100);
+		console.log("Removing training data!");
+	}
+	
+	//C = Clear Training Data
+	if (event.keyCode == 67 && trainingMode) {
+		trainingData = [];
+		console.log("Training Data Cleared!");
+	}
+	
+	//E = Export CSV
+	if (event.keyCode == 69 && trainingMode) {
+		console.log("Exporting training data");
+		downloadCSV(trainingData);
+		trainingData = [];
+	}
+});
 
 function onVideoStarted() {
     let video = document.getElementById('videoInput');
@@ -202,6 +243,16 @@ function onVideoStarted() {
                             point: centerMotion,
 							direction: direction
                         });
+						if(trainingOn) {
+							trainingData.push({
+								frame: dataFrame,
+								time: new Date().getTime() - dataTimeSubtract,
+								x: centerMotion.x,
+								y: centerMotion.y,
+								vertical: direction.vertical,
+								horizontal: direction.horizontal
+							});
+						}
                     } else if (dataMotionCap[dataMotionCap.length - 1].point.x !== centerMotion.x && dataMotionCap[dataMotionCap.length - 1].point.y !== centerMotion.y) {
                         dataMotionCap.push({
                             frame: dataFrame,
@@ -215,6 +266,16 @@ function onVideoStarted() {
                             point: centerMotion,
 							direction: direction
                         });
+						if(trainingOn) {
+							trainingData.push({
+								frame: dataFrame,
+								time: new Date().getTime() - dataTimeSubtract,
+								x: centerMotion.x,
+								y: centerMotion.y,
+								vertical: direction.vertical,
+								horizontal: direction.horizontal
+							});
+						}
                     }
 					
 					//ScatterPlot
