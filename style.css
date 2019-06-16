@@ -1,3 +1,23 @@
+
+.modal-dialog {
+      max-width: 1400px;
+      margin: 30px auto;
+  }
+
+.modal-body {
+  position:relative;
+  padding:0px;
+}
+.close {
+  position:absolute;
+  right:0px;
+  top:0;
+  z-index:999;
+  color:#ffffff;
+  opacity:1;
+}
+
+
 #heading {
 	padding-top: 25px;
 	padding-left: 25px;
