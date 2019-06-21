@@ -59,6 +59,7 @@ startAndStop.addEventListener('click', () => {
 //Training Mode Options
 var trainingMode = false;
 var trainingOn = false;
+var patternType = 0;
 var trainingData = [];
 addEventListener("keydown", function (event) {
 	//T = toggle training mode;
@@ -69,33 +70,59 @@ addEventListener("keydown", function (event) {
 		console.log("Training Mode: " + trainingMode);
 	}
 	
-	//L = Get trainingData length 
-	if(event.keyCode == 76 && trainingMode) 
-		console.log("Training Datat Count: " + trainingData.length);
-	
-	//P = Pause & Unpause Training Mode
-	if(event.keyCode == 80 && trainingMode) {
-		trainingOn = !trainingOn;
-		console.log("Training Paused: " + !trainingOn);
-	}
-	
-	//R = Remove last 100 training records.
-	if(event.keyCode == 82 && trainingMode) {
-		trainingData = trainingData.slice(0,-100);
-		console.log("Removing training data!");
-	}
-	
-	//C = Clear Training Data
-	if (event.keyCode == 67 && trainingMode) {
-		trainingData = [];
-		console.log("Training Data Cleared!");
-	}
-	
-	//E = Export CSV
-	if (event.keyCode == 69 && trainingMode) {
-		console.log("Exporting training data");
-		downloadCSV(trainingData);
-		trainingData = [];
+	if(trainingMode) {
+		switch(event.keyCode) {
+			//L = Get trainingData length 
+			case 76:
+				console.log("Training Datat Count: " + trainingData.length);
+				break;
+			//P = Pause & Unpause Training Mode
+			case 80:
+				trainingOn = !trainingOn;
+				console.log("Training Paused: " + !trainingOn);
+				break;
+			//R = Remove last 100 training records.
+			case 82:
+				trainingData = trainingData.slice(0,-100);
+				console.log("Removing training data!");
+				break;
+			//C = Clear Training Data
+			case 67:
+				trainingData = [];
+				console.log("Training Data Cleared!");
+				break;
+			//E = Export CSV
+			case 69:
+				console.log("Exporting training data");
+				downloadCSV(trainingData);
+				trainingData = [];
+				break;
+			//SET PATTERN TYPES
+			//0 - Unknown
+			case 48:
+				console.log("Setting type to 0 (UNKNOWN)");
+				patternType = 0;
+				break;
+			//1 - Cascade
+			case 49:
+				console.log("Setting type to 1 (CASCADE)");
+				patternType = 1;
+				break;
+			//2 - Reverse Cascade
+			case 50:
+				console.log("Setting type to 2 (REVERSE CASCADE)");
+				patternType = 2;
+				break;
+			//3 - Shower
+			case 51:
+				console.log("Setting type to 3 (SHOWER)");
+				patternType = 3;
+				break;
+			//4 - Mills Mess
+			case 52:
+				console.log("Setting type to 4 (MILLS MESS)");
+				patternType = 4;
+		}
 	}
 });
 
@@ -273,7 +300,8 @@ function onVideoStarted() {
 								x: centerMotion.x,
 								y: centerMotion.y,
 								vertical: direction.vertical,
-								horizontal: direction.horizontal
+								horizontal: direction.horizontal,
+								pattern: patternType
 							});
 						}
                     }
