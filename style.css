@@ -1,58 +1,80 @@
-body, div, p {
-    font: 400 14px/22px Roboto,sans-serif;
+
+.modal-dialog {
+      max-width: 1400px;
+      margin: 30px auto;
+  }
+
+.modal-body {
+  position:relative;
+  padding:0px;
 }
-canvas, img, video {
-    border: 1px solid black;
+.close {
+  position:absolute;
+  right:0px;
+  top:0;
+  z-index:999;
+  color:#ffffff;
+  opacity:1;
 }
-td {
-    padding: 10px 0px 0px 10px;
-    text-align: center;
+
+
+#heading {
+	padding-top: 25px;
+	padding-left: 25px;
+	padding-right: 25px;
+	text-align: center;
 }
-button {
-    display: inline-block;
-    color: #fff;
-    background-color: #337ab7;
-    border-color: #2e6da4;
-    padding: 6px 12px;
-    margin-bottom: 0;
-    font-size: 14px;
-    font-weight: bold;
-    text-align: center;
-    white-space: nowrap;
-    vertical-align: middle;
-    -ms-touch-action: manipulation;
-    touch-action: manipulation;
-    cursor: pointer;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    background-image: none;
-    border: 1px solid transparent;
-    border-radius: 4px;
+
+#status {
+	text-align: center;
+	display: inline-block;
+	padding-right:100px;
 }
-button[disabled] {
-    cursor: not-allowed;
-    filter: alpha(opacity=65);
-    -webkit-box-shadow: none;
-    box-shadow: none;
-    opacity: .65;
+
+#logo {
+	float: left;
+	padding-top: 10px;
 }
-.control {
-    margin-bottom: 3px;
+
+#dropdownMenu {
+	padding-left: 30px;
+	padding-right: 30px;
 }
-.err {
-    color: red;
-    font-weight: bold;
+
+#centralArea {
+	padding-top: 15px;
+	padding-left: 30px;
+	padding-right: 30px;
+	height: 400px;
+	text-align: center;
+	display: inline-flex;
+	width: 100%;
 }
-.inputoutput {
-    margin-top: 1em;
-    margin-bottom: 1em;
+
+#scatterPlotArea {
+	float: left;
+	height: 100%;
+	width:33%;
 }
-.caption {
-    margin: 0;
-    font-weight: bold;
+
+#mainVideo {
+	float: left;
+	height: 100%;
+	width: 33%;
+	min-width: 360px;
 }
-.hidden {
-    display: none;
+
+#patternMatchingArea {
+	float: left;
+	height: 100%;
+	width: 33%;
 }
+
+.display {
+    color: #17D4FE;
+    font-size: 32px;
+    font-family: Orbitron;
+	letter-spacing: 7px;
+
+}
+
